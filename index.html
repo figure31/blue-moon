@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Moon</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="container">
+        <canvas id="canvas"></canvas>
+
+        <div id="ui-overlay">
+            <!-- Top UI -->
+            <div id="top-ui">
+                <div id="top-left">
+                    <div id="progress-counter">loading...</div>
+                    <div id="colors-counter">loading...</div>
+                    <div id="value-counter">loading...</div>
+                    <div id="minters-counter">loading...</div>
+                </div>
+                <div id="top-center">
+                    <div id="music-player">
+                        <div id="song-title-container">
+                            <div id="song-title">Blue moon (Take 9/M) - elvis Presley</div>
+                        </div>
+                        <button id="play-pause-btn">◼</button>
+                    </div>
+                </div>
+                <div id="top-right">
+                    <div id="address-feed">4444 minted by <a href="#" class="address-link" target="_blank">0x0000...0000</a></div>
+                </div>
+            </div>
+
+            <!-- Bottom UI -->
+            <div id="bottom-ui">
+                <div id="bottom-left">
+                    <button id="about-btn">about</button>
+                    <a id="contract-erc20-link" href="#" class="link-button" target="_blank">contract erc20</a>
+                    <a id="contract-erc721-link" href="#" class="link-button" target="_blank">contract erc721</a>
+                </div>
+                <div id="bottom-center">
+                    <button id="claim-artwork-btn">view/claim artwork</button>
+                </div>
+                <div id="bottom-right">
+                    <button id="connect-btn">connect</button>
+                    <div id="wallet-info">
+                        <span id="wallet-minted">0 $BLUE minted</span>
+                        <button id="highlight-btn" style="display:none;">highlight</button>
+                        <span id="wallet-usdc">0 USDC</span>
+                        <span id="wallet-address">0x0000...0000</span>
+                    </div>
+                    <button id="mint-btn">mint</button>
+                </div>
+            </div>
+
+            <!-- About Modal -->
+            <div id="about-modal">
+                <button id="close-about">x</button>
+                <p class="section-title">Created by <a href="https://x.com/figure31_" target="_blank" style="text-decoration: underline;">figure31</a>, 2025</p>
+                <p>BLUE MOON, $BMOON ERC20<br>
+                Supply: 88,888,888<br>
+                Mint: Base, public, on-chain<br>
+                0.88 USDC per lot of 4444 $BMOON, 20,002 lots available</p>
+
+                <p>BLUE MOON, $BMOON ERC721<br>
+                Supply: 22 + 4 AP<br>
+                Mint: Base, available only to $BMOON owners, on-chain<br>
+                1,777,778 $BMOON per NFT mint<br>
+                Metadata: on-chain, dynamic<br>
+                Every mint comes with two 88x88 CM prints (or 44x44 CM) on Hahnemühle 300 GSM Photo Rag acid-free paper, printed with water-based archival ink. Shipping and duties not included. Get in touch with <a href="https://x.com/figure31_" target="_blank" style="text-decoration: underline;">figure31</a> for claims.</p>
+
+                <p>***</p>
+
+                <p>Blue Moon ($BMOON) is a dual ERC20-ERC721 release. ERC20 mints are done in lots of 4,444 (1 lot) or 35,552 tokens (8 lots), and paid in USDC. Every lot minted also generates a random blue HSL color value stored on-chain via contract event logs, leaving behind an everlasting trace of each address's participation. The color data is indexed and used to deterministically generate a collectively-owned artwork shown on the homepage.</p>
+
+                <p>Owners of $BMOON tokens can claim/mint NFTs with the tokens they have acquired. The contract only accepts 1,777,778 $BMOON per mint, or 2% of the total token supply. Tokens spent for minting are taken out of circulation. The contract generates entirely on-chain dynamic art (base64 formatting). The artworks themselves are 22 x 22 grids of 242 unique random blue hues, used twice, and laid out with a pseudo-Fisher-Yates shuffle on-chain algorithm. The owner's address and the latest mined block are used as seeds to generate the hues, meaning that every time the artworks are generated via the contract's read function, the output changes. There is no maximum number of prints collectors of these NFTs may order since these assets can produce an almost infinite amount of outputs.</p>
+
+                <p>Both ERC20 and ERC721 mints use the same HSL blue-tone range of: Hue 209-230° (22 variations), Saturation 37-100% (11 variations), Lightness 20-63% (44 variations).</p>
+
+                <p>***</p>
+
+                <p class="section-title">Minting the ERC20</p>
+
+                <p>Set your network on Base mainnet. Connect your wallet with the button in the bottom right corner then click the mint button next to it. You must first approve the contract to spend your USDC, then you can mint at will. The minting process voluntarily requires collectors to spam the mint function and witness the growth of the collective artwork. The canvas auto-refreshes every couple of seconds to display new mints. You can highlight your mints on the canvas with the "highlight" button. Do not send USDC directly to the contract. No refunds.</p>
+
+                <p class="section-title">Minting the ERC721</p>
+
+                <p>You need at least 1,777,778 $BMOON (2% of the supply) to mint an NFT. Click on the view/claim artwork button. The page displays all 26 NFTs, minted or not. Scroll down to find unminted ones and click the "claim/mint" button. You will first need to approve the NFT contract to transfer your $BMOON, then click again to mint. The page will refresh and display your newly minted asset. Do not send $BMOON directly to the contract. No refunds.</p>
+
+                <p class="section-title">If you prefer not to use the frontend, you can interact with the contracts directly via BaseScan:</p>
+
+                <p><a id="usdc-contract-link" href="#" target="_blank" style="text-decoration: underline;">USDC</a> (approve the $BMOON contract to spend up to 1,549 USDC for max mint)<br>
+                <a id="bmoon-erc20-link" href="#" target="_blank" style="text-decoration: underline;">$BMOON ERC20</a> (use the mint write function and input either 1 or 8 for lot size)<br>
+                <a id="bmoon-erc721-link" href="#" target="_blank" style="text-decoration: underline;">$BMOON ERC721</a> (first, approve the ERC721 contract to spend 1,777,778 $BMOON on the ERC20 contract, second, use the mint function)</p>
+
+                <p>***</p>
+
+                <p class="section-title">An update on colour usage</p>
+
+                <p>In 1973, Gerhard Richter created "4096 Farben", a systematic grid exploration of colour liberated from compositional intent. He collected samples of commercial paint, assigned numbers to the colours, placed them in a box, and drew at random to determine each colour's position. The canvas's subdivision and proportions were achieved through continual subdivision by equal gradations. The result: a grid where each colour adapts to whichever other colour is used. Colours are laid bare from their representational value and treated as ready-mades. With these constraints, the role and judgement of the painter in the making of the image is put into question.</p>
+
+                <p>Fifty-two years later, Blue Moon approaches a grid arrangement of colours in a similar detached manner. The choice of blue, determined by the commercial nature of the network on which the release is made, the title, taken from an Elvis Presley song looped endlessly on the page, and the simplistic nature of the generative grid output seem almost satirical. The artwork does two things. First, it recontextualizes common on-chain experiences, such as token minting and on-chain generative art. Second, it defines a range of digital colours using a set of self-referential values and arranges them according to different rules and input parameters: randomness, deterministic shuffling, equal representation, and live blockchain data. The artist's hand gives way to algorithmic fairness and the chaotic, evolving nature of blockchain events. A part of the creation process is deferred to collectors and the blockchain itself, who act as active participants in the making of the artworks. Like "4096 Farben", these pieces sit between accumulation and distribution, calculation and randomness, system and chaos. The artist's judgment and creative role are laid aside, almost arbitrarily. The lack of determinism is further enhanced by the refusal to confine the generative outputs of the NFTs to a fixed outcome.</p>
+
+            </div>
+
+            <!-- Mint Modal -->
+            <div id="mint-modal">
+                <button id="close-mint">x</button>
+                <div id="mint-limit-display">Loading...</div>
+                <div id="mint-options">
+                    <button id="mint-1-btn" class="mint-option-btn">
+                        <div class="mint-amount">...</div>
+                        <div class="mint-cost">...</div>
+                    </button>
+                    <button id="mint-8-btn" class="mint-option-btn">
+                        <div class="mint-amount">...</div>
+                        <div class="mint-cost">...</div>
+                    </button>
+                </div>
+                <div id="mint-status"></div>
+            </div>
+
+            <!-- Artwork Gallery Modal -->
+            <div id="artwork-modal">
+                <button id="close-artwork">x</button>
+                <h2></h2>
+                <div id="artwork-grid"></div>
+            </div>
+
+            <!-- Audio Element -->
+            <audio id="audio-player" src="blue_moon_elvis.mp3" loop autoplay></audio>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

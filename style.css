@@ -1,0 +1,489 @@
+@font-face {
+    font-family: 'ProtoMono';
+    src: url('ProtoMono-Medium.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+:root {
+    --blue: #234fde;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background: white;
+    font-family: 'ProtoMono', monospace;
+    font-size: 12px;
+    color: var(--blue);
+}
+
+#container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* UI Overlay */
+#ui-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#ui-overlay > * {
+    pointer-events: auto;
+}
+
+/* Top Margin UI */
+#top-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 12px;
+    line-height: 1;
+}
+
+#top-left {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+#top-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+}
+
+#music-player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#song-title-container {
+    width: 120px;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+}
+
+#song-title {
+    display: inline-block;
+    padding-right: 50px;
+    animation: scroll-text 15s linear infinite;
+}
+
+@keyframes scroll-text {
+    0%, 20% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+#play-pause-btn {
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 1;
+    border: none;
+    background: transparent;
+    color: var(--blue);
+    cursor: pointer;
+    transform: translateY(-5%);
+}
+
+#play-pause-btn:hover {
+    background: transparent;
+    color: var(--blue);
+    opacity: 0.7;
+}
+
+#top-right {
+    display: flex;
+    align-items: center;
+}
+
+.address-link {
+    color: var(--blue);
+    text-decoration: underline;
+}
+
+.address-link:hover {
+    text-decoration: underline;
+}
+
+/* Bottom Margin UI */
+#bottom-ui {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 12px;
+    line-height: 1;
+}
+
+#bottom-left {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+#bottom-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+}
+
+#bottom-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Buttons */
+button {
+    font-family: 'ProtoMono', monospace;
+    font-size: 12px;
+    background: white;
+    border: 1px solid var(--blue);
+    padding: 1px 4px;
+    cursor: pointer;
+    color: var(--blue);
+    line-height: 1;
+}
+
+button:hover {
+    background: var(--blue);
+    color: white;
+}
+
+.link-button {
+    font-family: 'ProtoMono', monospace;
+    font-size: 12px;
+    color: var(--blue);
+    text-decoration: none;
+    border: 1px solid var(--blue);
+    padding: 1px 4px;
+    display: inline-block;
+    line-height: 1;
+}
+
+.link-button:hover {
+    background: var(--blue);
+    color: white;
+}
+
+#wallet-info {
+    display: none;
+    gap: 10px;
+    align-items: center;
+}
+
+#wallet-info.connected {
+    display: flex;
+}
+
+#connect-btn.connected {
+    display: none;
+}
+
+#mint-btn, #claim-artwork-btn, #about-btn {
+    background: var(--blue);
+    color: white;
+}
+
+#mint-btn:hover, #claim-artwork-btn:hover, #about-btn:hover {
+    background: white;
+    color: var(--blue);
+}
+
+/* About Modal */
+#about-modal {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 60px);
+    background: white;
+    display: none;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+#about-modal.active {
+    display: block;
+}
+
+#about-modal h2 {
+    margin-bottom: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+#about-modal p {
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+#about-modal p.section-title {
+    margin-bottom: 7.5px;
+}
+
+#about-modal a {
+    color: var(--blue);
+}
+
+#about-modal a:visited {
+    color: var(--blue);
+}
+
+#close-about {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* Mint Modal */
+#mint-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background: var(--blue);
+    border: 2px solid var(--blue);
+    padding: 25px;
+    display: none;
+    z-index: 1000;
+    color: white;
+}
+
+#mint-modal.active {
+    display: block;
+}
+
+#close-mint {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 12px;
+    background: var(--blue);
+    color: white;
+    border: 1px solid white;
+    padding: 1px 4px;
+    cursor: pointer;
+    font-family: 'ProtoMono', monospace;
+}
+
+#close-mint:hover {
+    background: white;
+    color: var(--blue);
+    border: 1px solid white;
+}
+
+#mint-limit-display {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: white;
+}
+
+#mint-options {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.mint-option-btn {
+    flex: 1;
+    padding: 15px 10px;
+    background: var(--blue);
+    border: 1px solid white;
+    cursor: pointer;
+    color: white;
+    font-family: 'ProtoMono', monospace;
+    font-size: 12px;
+    text-align: center;
+}
+
+.mint-option-btn:hover {
+    background: white;
+    color: var(--blue);
+    border: 1px solid white;
+}
+
+.mint-amount {
+    font-size: 12px;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.mint-cost {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+#mint-status {
+    text-align: center;
+    font-size: 12px;
+    min-height: 14px;
+    color: white;
+}
+
+/* Artwork Gallery Modal */
+#artwork-modal {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 60px);
+    background: white;
+    display: none;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+#artwork-modal.active {
+    display: block;
+}
+
+#artwork-modal h2 {
+    margin-bottom: 30px;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+}
+
+#close-artwork {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+#artwork-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.nft-box {
+    border: 2px solid var(--blue);
+    background: white;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nft-artwork {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+}
+
+.nft-artwork svg {
+    width: 100%;
+    height: 100%;
+}
+
+.nft-artwork.unminted {
+    font-size: 12px;
+    color: var(--blue);
+    border: 1px solid var(--blue);
+}
+
+.nft-traits {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12px;
+}
+
+.nft-trait {
+    display: flex;
+    justify-content: space-between;
+}
+
+.trait-label {
+    font-weight: 500;
+}
+
+.trait-value {
+    word-break: break-all;
+}
+
+.nft-view-btn {
+    width: 100%;
+    padding: 4px;
+    font-size: 12px;
+}
+
+.nft-view-btn.mint-style {
+    background: var(--blue);
+    color: white;
+}
+
+.nft-view-btn.mint-style:hover {
+    background: white;
+    color: var(--blue);
+}
+
+.nft-view-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: white;
+    color: var(--blue);
+}
