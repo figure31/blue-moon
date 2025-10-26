@@ -485,9 +485,12 @@ async function getUSDCBalance(address) {
  * Update wallet UI with user data
  */
 async function updateWalletUI() {
+    const isMobile = window.innerWidth <= 768;
+    const mintedSuffix = isMobile ? '' : ' minted';
+
     if (!userAddress) {
         walletInfo.classList.remove('connected');
-        walletMinted.textContent = `0 $${TOKEN_SYMBOL || 'BLUE'} minted`;
+        walletMinted.textContent = `0 $${TOKEN_SYMBOL || 'BLUE'}${mintedSuffix}`;
         walletUsdc.textContent = '0 USDC';
         walletAddress.textContent = '0x0000...0000';
         highlightBtn.style.display = 'none';
@@ -510,7 +513,7 @@ async function updateWalletUI() {
 
     // Update UI - minted amount from subgraph, USDC from contract
     const blueMinted = userStats ? Math.floor(parseInt(userStats.totalBlueMinted) / 1e18) : 0;
-    walletMinted.textContent = `${blueMinted.toLocaleString()} $${TOKEN_SYMBOL || 'BLUE'} minted`;
+    walletMinted.textContent = `${blueMinted.toLocaleString()} $${TOKEN_SYMBOL || 'BLUE'}${mintedSuffix}`;
     walletUsdc.textContent = `${parseFloat(usdcBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
 
     // Store user's mintIds for highlight feature
@@ -894,18 +897,21 @@ function updateMintLimitDisplay() {
         return;
     }
 
+    const isMobile = window.innerWidth <= 768;
+    const suffix = isMobile ? '' : ' max tokens minted';
+
     if (!userAddress || !cachedUserStats) {
-        mintLimitDisplay.textContent = `0 / ${MAX_MINT_LIMIT.toLocaleString()} max tokens minted`;
+        mintLimitDisplay.textContent = `0 / ${MAX_MINT_LIMIT.toLocaleString()}${suffix}`;
         return;
     }
 
     const minted = cachedUserStats ? Math.floor(parseInt(cachedUserStats.totalBlueMinted) / 1e18) : 0;
-    mintLimitDisplay.textContent = `${minted.toLocaleString()} / ${MAX_MINT_LIMIT.toLocaleString()} max tokens minted`;
+    mintLimitDisplay.textContent = `${minted.toLocaleString()} / ${MAX_MINT_LIMIT.toLocaleString()}${suffix}`;
 }
 
 // Canvas setup
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d', { alpha: false });
+const ctx = canvas.getContext('2d');
 
 // Grid properties
 let cols, rows, cellSize;
@@ -1281,6 +1287,22 @@ function handleResize() {
         cancelAnimationFrame(animationId);
     }
 
+    // Update wallet address and minted text format if connected (mobile vs desktop)
+    if (isWalletConnected && userAddress) {
+        const isMobile = window.innerWidth <= 768;
+        const mintedSuffix = isMobile ? '' : ' minted';
+        walletAddress.textContent = formatAddress(userAddress);
+
+        // Update wallet minted text format
+        const currentText = walletMinted.textContent;
+        const match = currentText.match(/^([\d,]+)\s+\$(\w+)(\s+minted)?$/);
+        if (match) {
+            const amount = match[1];
+            const symbol = match[2];
+            walletMinted.textContent = `${amount} $${symbol}${mintedSuffix}`;
+        }
+    }
+
     // Reset and reinitialize
     currentIndex = 0;
     init();
@@ -1490,9 +1512,17 @@ function animateCounters(fromZero = false) {
 
 /**
  * Format address for display (0x1234...5678)
+ * Shorter format on mobile (0x12...78)
  */
 function formatAddress(address) {
     if (!address || address.length < 10) return '0x0000...0000';
+
+    // Use shorter format on mobile
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        return `${address.slice(0, 4)}...${address.slice(-2)}`;
+    }
+
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 

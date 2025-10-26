@@ -487,3 +487,197 @@ button:hover {
     background: white;
     color: var(--blue);
 }
+
+/* ============================================ */
+/* MOBILE RESPONSIVE STYLES */
+/* ============================================ */
+
+@media (max-width: 768px) {
+    /* Reduce font size to 10px on mobile for all elements */
+    body {
+        font-size: 10px;
+    }
+
+    button {
+        font-size: 10px;
+    }
+
+    .link-button {
+        font-size: 10px;
+    }
+
+    #top-ui,
+    #bottom-ui,
+    #about-modal h2,
+    #about-modal p,
+    #close-mint,
+    #mint-limit-display,
+    .mint-option-btn,
+    .mint-amount,
+    .mint-cost,
+    #mint-status,
+    #artwork-modal h2,
+    .nft-traits,
+    .nft-view-btn,
+    .nft-artwork.unminted,
+    #play-pause-btn {
+        font-size: 10px;
+    }
+
+    /* Hide extra counters on mobile - only show total mint counter */
+    #colors-counter,
+    #value-counter,
+    #minters-counter {
+        display: none;
+    }
+
+    /* Hide activity feed on mobile */
+    #address-feed {
+        display: none;
+    }
+
+    /* Hide song title on mobile - only show play/pause button */
+    #song-title-container {
+        display: none;
+    }
+
+    /* Hide USDC balance, wallet address, and highlight button on mobile to save space */
+    #wallet-usdc,
+    #wallet-address,
+    #highlight-btn {
+        display: none !important;
+    }
+
+    /* Hide contract links on mobile */
+    #contract-erc20-link,
+    #contract-erc721-link {
+        display: none;
+    }
+
+    /* Hide mint button on mobile by default */
+    #mint-btn {
+        display: none !important;
+    }
+
+    /* Show mint button when wallet is connected on mobile */
+    #wallet-info.connected ~ #mint-btn {
+        display: inline-flex !important;
+    }
+
+    /* Move claim artwork button to the left on mobile */
+    #bottom-center {
+        position: static;
+        transform: none;
+        order: 1;
+        margin-left: 8px;
+    }
+
+    #bottom-left {
+        order: 0;
+        gap: 8px;
+    }
+
+    #bottom-right {
+        order: 2;
+        margin-left: auto;
+    }
+
+    /* Change "view/claim artwork" to just "claim artwork" on mobile */
+    #claim-artwork-btn {
+        font-size: 0;
+    }
+
+    #claim-artwork-btn::before {
+        content: "claim artwork";
+        font-size: 10px;
+    }
+
+    /* Increase touch target sizes for buttons with equal padding */
+    button {
+        padding: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .link-button {
+        padding: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #play-pause-btn {
+        width: 44px;
+        height: 44px;
+        min-height: 44px;
+    }
+
+    /* Make mint modal responsive and compact */
+    #mint-modal {
+        width: 75%;
+        max-width: 300px;
+        padding: 15px;
+    }
+
+    #mint-limit-display {
+        margin-bottom: 15px;
+    }
+
+    #mint-options {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .mint-option-btn {
+        padding: 8px 12px;
+        width: 70%;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .mint-amount,
+    .mint-cost {
+        margin-bottom: 0;
+    }
+
+    .mint-amount {
+        margin-bottom: 4px;
+    }
+
+    /* Reduce modal padding on mobile */
+    #about-modal {
+        padding: 20px;
+    }
+
+    #artwork-modal {
+        padding: 20px;
+    }
+
+    /* Make close buttons consistent with mint modal on mobile */
+    #close-about,
+    #close-artwork {
+        padding: 6px;
+        font-size: 10px;
+    }
+
+    /* Adjust UI bar spacing */
+    #top-left {
+        gap: 10px;
+    }
+
+    #bottom-left {
+        gap: 8px;
+    }
+
+    #bottom-right {
+        gap: 8px;
+    }
+
+    /* Reduce wallet info gap */
+    #wallet-info {
+        gap: 8px;
+    }
+}
