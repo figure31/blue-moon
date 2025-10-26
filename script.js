@@ -245,11 +245,6 @@ async function getUserStats(address) {
  */
 async function initializeContractValues() {
     try {
-        console.log('='.repeat(50));
-        console.log(`🌐 Network: ${CURRENT_NETWORK.name}`);
-        console.log(`📍 Chain ID: ${BASE_CHAIN_ID}`);
-        console.log(`📝 BlueMoon Contract: ${BLUEMOON_CONTRACT}`);
-        console.log('='.repeat(50));
 
         // Cache key includes contract address to invalidate cache if contract changes
         const cacheKey = `bluemoon_config_${BLUEMOON_CONTRACT.toLowerCase()}`;
@@ -262,7 +257,6 @@ async function initializeContractValues() {
 
                 // Validate cache has all required fields (invalidate old cache)
                 if (!config.tokenSymbol || !config.totalSupply || !config.maxMints) {
-                    console.log('Cache missing required fields, fetching from contract...');
                     localStorage.removeItem(cacheKey);
                 } else {
                     USDC_CONTRACT = config.usdcContract;
@@ -274,24 +268,12 @@ async function initializeContractValues() {
                     TOTAL_SUPPLY = config.totalSupply;
                     TOTAL_SQUARES = config.maxMints;
 
-                    console.log('✅ Loaded from cache');
-                    console.log('✅ Token Symbol:', TOKEN_SYMBOL);
-                    console.log('✅ Total Supply:', TOTAL_SUPPLY.toLocaleString(), `${TOKEN_SYMBOL}`);
-                    console.log('✅ Grid Size (MAX_MINTS):', TOTAL_SQUARES.toLocaleString(), 'squares');
-                    console.log('✅ USDC Contract:', USDC_CONTRACT);
-                    console.log('✅ Mint Price:', ethers.utils.formatUnits(MINT_PRICE_USDC, 6), 'USDC');
-                    console.log('✅ Tokens per Mint:', TOKENS_PER_MINT.toLocaleString(), `$${TOKEN_SYMBOL}`);
-                    console.log('✅ Max Tokens per Address:', MAX_MINT_LIMIT.toLocaleString(), 'tokens');
-                    console.log('✅ Max USDC Approval:', ethers.utils.formatUnits(MAX_USDC_APPROVAL, 6), 'USDC');
 
                     return true;
                 }
             } catch (e) {
-                console.log('Cache invalid, fetching from contract...');
             }
         }
-
-        console.log('🔍 Reading contract values from BlueMoon contract...');
 
         // Create a read-only provider (doesn't require wallet connection)
         const readProvider = new ethers.providers.JsonRpcProvider(BASE_RPC);
@@ -299,16 +281,13 @@ async function initializeContractValues() {
 
         // Read token symbol from contract
         TOKEN_SYMBOL = await blueMoonContract.symbol();
-        console.log('✅ Token Symbol:', TOKEN_SYMBOL);
 
         // Read total supply from contract
         const totalSupplyFromContract = await blueMoonContract.totalSupply();
         TOTAL_SUPPLY = Math.floor(parseFloat(ethers.utils.formatUnits(totalSupplyFromContract, 18)));
-        console.log('✅ Total Supply:', TOTAL_SUPPLY.toLocaleString(), TOKEN_SYMBOL);
 
         // Read USDC contract address from BlueMoon contract
         USDC_CONTRACT = await blueMoonContract.usdc();
-        console.log('✅ USDC Contract:', USDC_CONTRACT);
 
         // Update USDC contract link in about page
         updateUSDCLink();
@@ -316,30 +295,24 @@ async function initializeContractValues() {
         // Read mint price from contract (returns value in 6 decimals for USDC)
         const mintPriceFromContract = await blueMoonContract.MINT_PRICE();
         MINT_PRICE_USDC = mintPriceFromContract.toString();
-        console.log('✅ Mint Price:', ethers.utils.formatUnits(MINT_PRICE_USDC, 6), 'USDC');
 
         // Read max mints per address from contract (this is NUMBER OF MINTS, not tokens)
         const maxMintsFromContract = await blueMoonContract.MAX_MINTS_PER_ADDRESS();
         const maxMintsPerAddress = maxMintsFromContract.toNumber();
-        console.log('✅ Max Mints per Address:', maxMintsPerAddress, 'mints');
 
         // Read tokens per mint
         const tokensPerMintFromContract = await blueMoonContract.TOKENS_PER_MINT();
         TOKENS_PER_MINT = Math.floor(parseFloat(ethers.utils.formatUnits(tokensPerMintFromContract, 18)));
-        console.log('✅ Tokens per Mint:', TOKENS_PER_MINT.toLocaleString(), `$${TOKEN_SYMBOL}`);
 
         // Calculate max tokens (for display purposes)
         MAX_MINT_LIMIT = TOKENS_PER_MINT * maxMintsPerAddress;
-        console.log('✅ Max Tokens per Address:', MAX_MINT_LIMIT.toLocaleString(), 'tokens');
 
         // Calculate max USDC approval needed (MINT_PRICE × number of mints)
         MAX_USDC_APPROVAL = ethers.BigNumber.from(MINT_PRICE_USDC).mul(maxMintsPerAddress);
-        console.log('✅ Max USDC Approval:', ethers.utils.formatUnits(MAX_USDC_APPROVAL, 6), 'USDC');
 
         // Read MAX_MINTS from contract (total number of lots in the artwork)
         const totalMaxMintsFromContract = await blueMoonContract.MAX_MINTS();
         TOTAL_SQUARES = totalMaxMintsFromContract.toNumber();
-        console.log('✅ Grid Size (MAX_MINTS):', TOTAL_SQUARES.toLocaleString(), 'squares');
 
         // Cache the configuration
         const configToCache = {
@@ -353,7 +326,6 @@ async function initializeContractValues() {
             maxUsdcApproval: MAX_USDC_APPROVAL.toString()
         };
         localStorage.setItem(cacheKey, JSON.stringify(configToCache));
-        console.log('💾 Configuration cached');
 
         return true;
     } catch (error) {
@@ -525,27 +497,18 @@ async function updateWalletUI() {
         highlightBtn.style.display = 'none';
     }
 
-    console.log('Wallet UI updated:', {
-        address: userAddress,
-        usdcBalance,
-        blueMinted
-    });
 }
 
 /**
  * Connect wallet
  */
 async function connectWallet() {
-    console.log('🔌 Connect wallet clicked');
-
     // Check if ethers is loaded
     if (typeof ethers === 'undefined') {
         console.error('❌ ethers.js not loaded');
         alert('Loading error. Please refresh the page.');
         return false;
     }
-
-    console.log('✓ ethers.js loaded');
 
     // Check if wallet is available
     if (!window.ethereum) {
@@ -554,15 +517,9 @@ async function connectWallet() {
         return false;
     }
 
-    console.log('✓ window.ethereum detected');
-
     try {
-        console.log('📡 Requesting accounts...');
-
         // Request account access
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-        console.log('✓ Accounts received:', accounts);
 
         if (!accounts || accounts.length === 0) {
             console.error('❌ No accounts returned');
@@ -571,19 +528,15 @@ async function connectWallet() {
         }
 
         // Set up provider and signer
-        console.log('🔧 Setting up provider...');
         provider = new ethers.providers.Web3Provider(window.ethereum);
         signer = provider.getSigner();
         userAddress = accounts[0];
 
-        console.log('✓ Wallet connected:', userAddress);
-
         // Check if on correct network
-        console.log('🌐 Checking network...');
         const isCorrectNetwork = await checkNetwork();
 
         if (!isCorrectNetwork) {
-            console.log('⚠️ Wrong network, prompting switch...');
+            console.log('⚠️ Wrong network - switching to', CURRENT_NETWORK.name);
             const switched = await switchToBaseSepolia();
             if (!switched) {
                 console.error('❌ User rejected network switch');
@@ -594,7 +547,7 @@ async function connectWallet() {
                 userAddress = null;
                 return false;
             }
-            console.log(`✓ Network switched to ${CURRENT_NETWORK.name}`);
+            console.log('✅ Switched to', CURRENT_NETWORK.name);
         }
 
         // Mark as connected
@@ -602,12 +555,9 @@ async function connectWallet() {
         connectBtn.textContent = 'connected';
         connectBtn.classList.add('connected');
 
-        console.log('📊 Updating wallet UI...');
-
         // Update wallet UI
         await updateWalletUI();
 
-        console.log('✅ Wallet connection complete!');
         return true;
     } catch (error) {
         console.error('❌ Error connecting wallet:', error);
@@ -687,9 +637,6 @@ async function checkUSDCAllowance(amount) {
         const usdcContract = new ethers.Contract(USDC_CONTRACT, ERC20_ABI, provider);
         const allowance = await usdcContract.allowance(userAddress, BLUEMOON_CONTRACT);
 
-        console.log('Current USDC allowance:', ethers.utils.formatUnits(allowance, 6), 'USDC');
-        console.log('Required amount:', ethers.utils.formatUnits(amount, 6), 'USDC');
-
         return allowance.gte(ethers.BigNumber.from(amount));
     } catch (error) {
         console.error('Error checking allowance:', error);
@@ -719,7 +666,6 @@ async function approveUSDC(amount) {
         await tx.wait();
         mintStatus.textContent = 'USDC approved!';
 
-        console.log('✅ USDC approved for max mint limit:', ethers.utils.formatUnits(approvalAmount, 6), 'USDC');
         console.log('Transaction hash:', tx.hash);
         return true;
     } catch (error) {
@@ -761,12 +707,12 @@ async function executeMint(amount) {
         const tx = await blueMoonContract.mint(amount);
         mintStatus.textContent = 'waiting for confirmation...';
 
-        console.log('🎨 Mint transaction sent:', tx.hash);
+        console.log('Transaction hash:', tx.hash);
 
         const receipt = await tx.wait();
 
         mintStatus.textContent = `successfully minted ${tokenAmount} $${TOKEN_SYMBOL || 'BLUE'}!`;
-        console.log('✅ Mint confirmed:', receipt.transactionHash);
+        console.log('Transaction hash:', receipt.transactionHash);
 
         // Refresh data after mint (don't auto-close modal)
         refreshData();
@@ -844,7 +790,6 @@ async function handleMint(amount) {
         const hasAllowance = await checkUSDCAllowance(requiredAmount);
 
         if (!hasAllowance) {
-            console.log('Need to approve USDC spending first...');
             await approveUSDC(requiredAmount);
         }
 
@@ -935,6 +880,9 @@ let isInitialLoad = true; // Track if this is the first load
 let isHighlightMode = false;
 let userMintIds = []; // Array of mintIds that belong to connected user
 
+// Polling state
+let pollingIntervalId = null;
+
 /**
  * Calculate grid dimensions based on viewport
  */
@@ -1012,17 +960,12 @@ function hash(input) {
  * Fetches all ColorMinted events and builds the color array
  */
 async function loadColorsFromSubgraph() {
-    console.log('Loading colors from subgraph...');
-
     const colors = await getAllColors();
 
     if (!colors || colors.length === 0) {
-        console.log('No colors minted yet');
         blueShades = [];
         return;
     }
-
-    console.log(`Loaded ${colors.length} colors from subgraph`);
 
     // Initialize array with empty values
     blueShades = new Array(TOTAL_SQUARES).fill(null);
@@ -1040,12 +983,9 @@ async function loadColorsFromSubgraph() {
  * Load global statistics from subgraph
  */
 async function loadGlobalStats() {
-    console.log('Loading global stats from subgraph...');
-
     const stats = await getGlobalStats();
 
     if (!stats) {
-        console.log('No global stats available');
         globalStats = {
             totalTokensMinted: '0',
             remainingTokens: '88888888',
@@ -1061,26 +1001,20 @@ async function loadGlobalStats() {
 
     // TOTAL_SQUARES is now read directly from contract on page load
     // No need to update from subgraph
-
-    console.log('Loaded global stats:', globalStats);
 }
 
 /**
  * Load recent transactions for activity feed
  */
 async function loadRecentTransactions() {
-    console.log('Loading recent transactions from subgraph...');
-
     const transactions = await getRecentTransactions();
 
     if (!transactions || transactions.length === 0) {
-        console.log('No recent transactions');
         recentTransactions = [];
         return;
     }
 
     recentTransactions = transactions;
-    console.log(`Loaded ${recentTransactions.length} recent transactions`);
 }
 
 /**
@@ -1362,11 +1296,9 @@ const artworkGrid = document.getElementById('artwork-grid');
 function initializeExplorerLinks() {
     // Set ERC20 contract link
     contractERC20Link.href = `${CURRENT_NETWORK.explorer}/address/${BLUEMOON_CONTRACT}#code`;
-    console.log('✅ ERC20 contract link set to:', contractERC20Link.href);
 
     // Set ERC721 NFT contract link
     contractERC721Link.href = `${CURRENT_NETWORK.explorer}/address/${BLUEMOON_NFT_CONTRACT}#code`;
-    console.log('✅ ERC721 contract link set to:', contractERC721Link.href);
 
     // Set about page contract links
     if (bmoonERC20Link) {
@@ -1384,7 +1316,6 @@ function initializeExplorerLinks() {
 function updateUSDCLink() {
     if (usdcContractLink && USDC_CONTRACT) {
         usdcContractLink.href = `${CURRENT_NETWORK.explorer}/address/${USDC_CONTRACT}#code`;
-        console.log('✅ USDC contract link set to:', usdcContractLink.href);
     }
 }
 
@@ -1399,7 +1330,6 @@ function updateMintButtonVisibility() {
 
     if (isSoldOut) {
         mintBtn.style.display = 'none';
-        console.log('🚫 Mint sold out - hiding mint button');
     } else {
         mintBtn.style.display = 'inline-block';
     }
@@ -1616,7 +1546,6 @@ connectBtn.addEventListener('click', async () => {
  */
 highlightBtn.addEventListener('click', () => {
     if (!userMintIds || userMintIds.length === 0) {
-        console.log('No colors to highlight');
         return;
     }
 
@@ -1624,12 +1553,10 @@ highlightBtn.addEventListener('click', () => {
     isHighlightMode = !isHighlightMode;
 
     if (isHighlightMode) {
-        console.log(`🎨 Highlighting ${userMintIds.length} colors minted by user`);
         highlightBtn.textContent = 'show all';
         // Redraw canvas showing only user's colors
         redrawCanvas(userMintIds);
     } else {
-        console.log('🎨 Showing all colors');
         highlightBtn.textContent = 'highlight';
         // Redraw canvas showing all colors
         redrawCanvas(null);
@@ -1742,11 +1669,8 @@ audioPlayer.addEventListener('pause', updatePlayPauseButton);
  */
 async function refreshData() {
     const timestamp = new Date().toLocaleTimeString();
-    console.log(`[${timestamp}] 🔄 Refreshing data from subgraph...`);
-
     // Don't refresh if animation is still running
     if (animationId !== null) {
-        console.log('⚠️ Animation in progress, skipping refresh');
         return;
     }
 
@@ -1754,8 +1678,6 @@ async function refreshData() {
     const previousColorCount = blueShades.filter(c => c !== null).length;
     const previousTokens = globalStats ? Math.floor(parseInt(globalStats.totalTokensMinted) / 1e18) : 0;
     previousGlobalStats = globalStats ? { ...globalStats } : null;
-
-    console.log(`📊 Current state: ${previousColorCount} colors, ${previousTokens} tokens`);
 
     // Refresh all data
     await Promise.all([
@@ -1768,17 +1690,12 @@ async function refreshData() {
     const newColorCount = blueShades.filter(c => c !== null).length;
     const newTokens = globalStats ? Math.floor(parseInt(globalStats.totalTokensMinted) / 1e18) : 0;
 
-    console.log(`📊 New state: ${newColorCount} colors, ${newTokens} tokens`);
-
     if (newColorCount > previousColorCount) {
-        console.log(`✨ NEW COLORS DETECTED! ${previousColorCount} → ${newColorCount}`);
-
         // Update address feed with new transactions
         updateAddressFeed();
 
         // If in highlight mode, just update the data and redraw with filter
         if (isHighlightMode) {
-            console.log('🎨 Highlight mode active - updating highlighted view');
             redrawCanvas(userMintIds);
             animateCounters(false);
         } else {
@@ -1788,16 +1705,12 @@ async function refreshData() {
             animate(previousColorCount, newColorCount);
         }
     } else if (newTokens !== previousTokens) {
-        console.log(`📈 Token count changed (but no new colors): ${previousTokens} → ${newTokens}`);
         // Just update counters instantly
         updateCounters();
-    } else {
-        console.log('✓ No changes detected');
     }
 
     // Update wallet UI if connected (refreshes BLUE minted and USDC balance)
     if (isWalletConnected && userAddress) {
-        console.log('💰 Refreshing wallet data...');
         await updateWalletUI();
 
         // Also update mint limit display if modal is open
@@ -1805,17 +1718,44 @@ async function refreshData() {
             updateMintLimitDisplay();
         }
     }
-
-    console.log(`[${timestamp}] ✓ Data refresh complete\n`);
 }
 
 /**
  * Start polling for updates every 15 seconds
  */
 function startPolling() {
-    console.log(`🚀 Starting polling: will refresh every ${POLL_INTERVAL / 1000} seconds`);
-    setInterval(refreshData, POLL_INTERVAL);
+    // Clear any existing interval first
+    if (pollingIntervalId !== null) {
+        clearInterval(pollingIntervalId);
+    }
+    pollingIntervalId = setInterval(refreshData, POLL_INTERVAL);
 }
+
+/**
+ * Stop polling for updates
+ */
+function stopPolling() {
+    if (pollingIntervalId !== null) {
+        clearInterval(pollingIntervalId);
+        pollingIntervalId = null;
+    }
+}
+
+/**
+ * Handle page visibility changes to save API usage
+ * Stops polling when tab is hidden, resumes when visible
+ */
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        // Tab is now hidden - stop polling to save API calls
+        stopPolling();
+    } else {
+        // Tab is now visible - resume polling
+        startPolling();
+        // Also refresh data immediately so user sees fresh data
+        refreshData();
+    }
+});
 
 // Initialize on load
 // ============================================
@@ -1840,8 +1780,6 @@ async function loadArtworkGallery() {
         const totalSupply = await nftContract.TOTAL_SUPPLY();
         const artistProofs = await nftContract.ARTIST_PROOFS();
         const totalMinted = await nftContract.totalMinted();
-
-        console.log(`📊 NFT Contract: ${totalSupply} total supply, ${artistProofs} artist proofs, ${totalMinted} minted`);
 
         // Update modal heading
         const modalHeading = document.querySelector('#artwork-modal h2');
@@ -2021,7 +1959,7 @@ async function mintNFT(tokenId, buttonElement) {
         const blueTokenAddress = await nftContract.blueToken();
         const blueContract = new ethers.Contract(blueTokenAddress, ERC20_ABI, signer);
 
-        // Get mint price (1,777,778 BLUE tokens)
+        // Get mint price (1,777,778 BLUE tokens per NFT)
         const mintPrice = ethers.utils.parseEther('1777778');
 
         // Check BLUE balance
@@ -2041,21 +1979,30 @@ async function mintNFT(tokenId, buttonElement) {
         const allowance = await blueContract.allowance(address, BLUEMOON_NFT_CONTRACT);
 
         if (allowance.lt(mintPrice)) {
-            // Need approval first - stop here and require user to click again
+            // Need approval first - approve exactly the mint price for this NFT
+            // User will need to approve again for each subsequent NFT mint
             buttonElement.textContent = `approve $${TOKEN_SYMBOL || 'BLUE'}...`;
             const approveTx = await blueContract.approve(BLUEMOON_NFT_CONTRACT, mintPrice);
             buttonElement.textContent = 'approving...';
             await approveTx.wait();
 
-            // Approval successful - update button and require user to click again
-            buttonElement.textContent = 'approved! click again to mint';
-            setTimeout(() => {
-                buttonElement.textContent = 'claim/mint';
-            }, 3000);
-            return;
+            // Verify approval was successful
+            buttonElement.textContent = 'verifying approval...';
+            const newAllowance = await blueContract.allowance(address, BLUEMOON_NFT_CONTRACT);
+
+            if (newAllowance.lt(mintPrice)) {
+                // Approval didn't work for some reason
+                buttonElement.textContent = 'approval failed - try again';
+                setTimeout(() => {
+                    buttonElement.textContent = 'claim/mint';
+                }, 3000);
+                return;
+            }
+
+            // Approval successful - continue to minting automatically
         }
 
-        // Allowance is sufficient, proceed with minting
+        // Allowance is sufficient (or just approved), proceed with minting
         buttonElement.textContent = 'minting...';
         const mintTx = await nftContract.mint();
         buttonElement.textContent = 'confirming...';
