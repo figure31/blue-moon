@@ -2041,14 +2041,21 @@ async function mintNFT(tokenId, buttonElement) {
         const allowance = await blueContract.allowance(address, BLUEMOON_NFT_CONTRACT);
 
         if (allowance.lt(mintPrice)) {
-            // Need approval first
+            // Need approval first - stop here and require user to click again
             buttonElement.textContent = `approve $${TOKEN_SYMBOL || 'BLUE'}...`;
             const approveTx = await blueContract.approve(BLUEMOON_NFT_CONTRACT, mintPrice);
             buttonElement.textContent = 'approving...';
             await approveTx.wait();
+
+            // Approval successful - update button and require user to click again
+            buttonElement.textContent = 'approved! click again to mint';
+            setTimeout(() => {
+                buttonElement.textContent = 'claim/mint';
+            }, 3000);
+            return;
         }
 
-        // Now mint the NFT
+        // Allowance is sufficient, proceed with minting
         buttonElement.textContent = 'minting...';
         const mintTx = await nftContract.mint();
         buttonElement.textContent = 'confirming...';
@@ -2063,7 +2070,35 @@ async function mintNFT(tokenId, buttonElement) {
 
     } catch (error) {
         console.error('Error minting NFT:', error);
-        buttonElement.textContent = 'error - try again';
+
+        // Better error handling
+        let errorMessage = 'error - try again';
+
+        if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
+            errorMessage = 'user rejected transaction';
+        }
+        else if (error.code === 'INSUFFICIENT_FUNDS' || error.code === -32000) {
+            errorMessage = 'insufficient ETH for gas';
+        }
+        else if (error.code === 'NETWORK_ERROR' || error.code === 'CALL_EXCEPTION') {
+            errorMessage = 'wrong network or contract error';
+        }
+        else if (error.message) {
+            if (error.message.includes('insufficient')) {
+                errorMessage = `insufficient $${TOKEN_SYMBOL || 'BLUE'}`;
+            }
+            else if (error.message.includes('Already minted') || error.message.includes('already minted')) {
+                errorMessage = 'already minted';
+            }
+            else if (error.message.includes('Max supply reached')) {
+                errorMessage = 'max supply reached';
+            }
+            else if (error.message.includes('wrong network') || error.message.includes('unsupported network')) {
+                errorMessage = 'wrong network';
+            }
+        }
+
+        buttonElement.textContent = errorMessage;
         setTimeout(() => {
             buttonElement.textContent = 'claim/mint';
         }, 2000);
