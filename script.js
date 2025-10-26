@@ -884,6 +884,25 @@ let userMintIds = []; // Array of mintIds that belong to connected user
 let pollingIntervalId = null;
 
 /**
+ * Get safe area inset value for a specific side (for mobile browser UI)
+ * Returns the value in pixels
+ */
+function getSafeAreaInset(side) {
+    // Create a temporary element to read CSS env() values
+    const testDiv = document.createElement('div');
+    testDiv.style.position = 'fixed';
+    testDiv.style[side] = `env(safe-area-inset-${side}, 0px)`;
+    document.body.appendChild(testDiv);
+
+    // Get computed style
+    const computedValue = getComputedStyle(testDiv)[side];
+    document.body.removeChild(testDiv);
+
+    // Parse the pixel value
+    return parseFloat(computedValue) || 0;
+}
+
+/**
  * Calculate grid dimensions based on viewport
  */
 function calculateGrid() {
@@ -891,9 +910,13 @@ function calculateGrid() {
     const viewportHeight = window.innerHeight;
     const dpr = window.devicePixelRatio || 1;
 
-    // Fixed top and bottom margins (50px each = 100px total)
-    const topMargin = MARGIN_HEIGHT;
-    const bottomMargin = MARGIN_HEIGHT;
+    // Get safe area insets (for mobile browser UI)
+    const safeAreaTop = getSafeAreaInset('top');
+    const safeAreaBottom = getSafeAreaInset('bottom');
+
+    // Margins: UI height (30px) + safe area insets
+    const topMargin = MARGIN_HEIGHT + safeAreaTop;
+    const bottomMargin = MARGIN_HEIGHT + safeAreaBottom;
 
     // Available space: full width, height minus top and bottom margins
     const availableWidth = viewportWidth;

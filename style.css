@@ -17,7 +17,8 @@
 
 body {
     width: 100%;
-    height: 100vh;
+    height: 100vh; /* Fallback for older browsers */
+    height: 100dvh; /* Dynamic viewport height - adjusts for mobile browser UI */
     overflow: hidden;
     background: white;
     font-family: 'ProtoMono', monospace;
@@ -61,7 +62,7 @@ canvas {
 /* Top Margin UI */
 #top-ui {
     position: absolute;
-    top: 0;
+    top: env(safe-area-inset-top, 0); /* Accounts for notch on iOS */
     left: 0;
     width: 100%;
     height: 30px;
@@ -69,6 +70,8 @@ canvas {
     justify-content: space-between;
     align-items: center;
     padding: 0 10px;
+    padding-left: max(10px, env(safe-area-inset-left, 10px)); /* Side safe areas */
+    padding-right: max(10px, env(safe-area-inset-right, 10px));
     font-size: 12px;
     line-height: 1;
 }
@@ -154,7 +157,7 @@ canvas {
 /* Bottom Margin UI */
 #bottom-ui {
     position: absolute;
-    bottom: 0;
+    bottom: env(safe-area-inset-bottom, 0); /* Accounts for mobile browser UI */
     left: 0;
     width: 100%;
     height: 30px;
@@ -162,6 +165,8 @@ canvas {
     justify-content: space-between;
     align-items: center;
     padding: 0 10px;
+    padding-left: max(10px, env(safe-area-inset-left, 10px)); /* Side safe areas */
+    padding-right: max(10px, env(safe-area-inset-right, 10px));
     font-size: 12px;
     line-height: 1;
 }
@@ -246,13 +251,15 @@ button:hover {
 /* About Modal */
 #about-modal {
     position: absolute;
-    top: 30px;
+    top: calc(30px + env(safe-area-inset-top, 0px));
     left: 0;
     width: 100%;
-    height: calc(100% - 60px);
+    height: calc(100% - 60px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     background: white;
     display: none;
     padding: 40px;
+    padding-left: max(40px, env(safe-area-inset-left, 40px));
+    padding-right: max(40px, env(safe-area-inset-right, 40px));
     overflow-y: auto;
 }
 
@@ -381,13 +388,15 @@ button:hover {
 /* Artwork Gallery Modal */
 #artwork-modal {
     position: absolute;
-    top: 30px;
+    top: calc(30px + env(safe-area-inset-top, 0px));
     left: 0;
     width: 100%;
-    height: calc(100% - 60px);
+    height: calc(100% - 60px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
     background: white;
     display: none;
     padding: 40px;
+    padding-left: max(40px, env(safe-area-inset-left, 40px));
+    padding-right: max(40px, env(safe-area-inset-right, 40px));
     overflow-y: auto;
 }
 
@@ -650,10 +659,14 @@ button:hover {
     /* Reduce modal padding on mobile */
     #about-modal {
         padding: 20px;
+        padding-left: max(20px, env(safe-area-inset-left, 20px));
+        padding-right: max(20px, env(safe-area-inset-right, 20px));
     }
 
     #artwork-modal {
         padding: 20px;
+        padding-left: max(20px, env(safe-area-inset-left, 20px));
+        padding-right: max(20px, env(safe-area-inset-right, 20px));
     }
 
     /* Make close buttons consistent with mint modal on mobile */
