@@ -591,16 +591,6 @@ button:hover {
         margin-left: auto;
     }
 
-    /* Change "view/claim artwork" to just "claim artwork" on mobile */
-    #claim-artwork-btn {
-        font-size: 0;
-    }
-
-    #claim-artwork-btn::before {
-        content: "claim artwork";
-        font-size: 10px;
-    }
-
     /* Increase touch target sizes for buttons with equal padding */
     button {
         padding: 6px;

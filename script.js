@@ -2076,15 +2076,225 @@ async function mintNFT(tokenId, buttonElement) {
 }
 
 /**
- * Open NFT artwork in new tab
+ * Open NFT artwork in new tab as PNG image (2200x2200px, Display P3 color space)
  */
 function openNFTInNewTab(svg, tokenId) {
-    const blob = new Blob([svg], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const newWindow = window.open(url, `_blank_nft_${tokenId}`);
+    // Generate timestamp for snapshot (YYYY-MM-DD_HH-MM-SS format)
+    const now = new Date();
+    const timestamp = now.getFullYear() + '-' +
+        String(now.getMonth() + 1).padStart(2, '0') + '-' +
+        String(now.getDate()).padStart(2, '0') + '_' +
+        String(now.getHours()).padStart(2, '0') + '-' +
+        String(now.getMinutes()).padStart(2, '0') + '-' +
+        String(now.getSeconds()).padStart(2, '0');
 
-    // Clean up the URL after a delay
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    const filename = `bluemoon_nft_token_${tokenId}_${timestamp}.png`;
+
+    // Open window immediately (synchronously with user click) to avoid popup blockers
+    const newWindow = window.open('', `_blank_nft_${tokenId}`);
+
+    if (!newWindow) {
+        alert('Please allow popups for this site to view NFT artwork.');
+        return;
+    }
+
+    // Write loading state to the window
+    newWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>${filename}</title>
+            <style>
+                body {
+                    margin: 0;
+                    padding: 0;
+                    background: white;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    font-family: monospace;
+                    color: #234fde;
+                }
+            </style>
+        </head>
+        <body>
+            <div>Loading artwork...</div>
+        </body>
+        </html>
+    `);
+
+    // Create a canvas with Display P3 color space for wider color gamut
+    const canvas = document.createElement('canvas');
+    const size = 4400; // 4400x4400px (200px per grid cell for 22x22 grid)
+    canvas.width = size;
+    canvas.height = size;
+
+    // Get context with Display P3 color space (important for accurate blue hues)
+    // Fallback to regular 2d context if Display P3 not supported
+    let ctx;
+    try {
+        ctx = canvas.getContext('2d', {
+            colorSpace: 'display-p3',
+            willReadFrequently: false
+        });
+    } catch (e) {
+        ctx = canvas.getContext('2d');
+    }
+
+    // Disable all image smoothing for pixel-perfect rendering
+    ctx.imageSmoothingEnabled = false;
+    if (ctx.imageSmoothingQuality) {
+        ctx.imageSmoothingQuality = 'high';
+    }
+
+    // Create an image from the SVG
+    const img = new Image();
+    const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
+
+    // Timeout fallback if image doesn't load within 10 seconds
+    const loadTimeout = setTimeout(() => {
+        newWindow.document.open();
+        newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Error</title>
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        background: white;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
+                        font-family: monospace;
+                        color: #234fde;
+                    }
+                </style>
+            </head>
+            <body>
+                <div>Error rendering NFT artwork. Please try again.</div>
+            </body>
+            </html>
+        `);
+        newWindow.document.close();
+        URL.revokeObjectURL(svgUrl);
+    }, 10000);
+
+    img.onload = function() {
+        clearTimeout(loadTimeout);
+        // Draw SVG to canvas at 2200x2200
+        ctx.drawImage(img, 0, 0, size, size);
+
+        // Clean up SVG blob URL
+        URL.revokeObjectURL(svgUrl);
+
+        // Convert canvas to data URL (base64 PNG)
+        const dataUrl = canvas.toDataURL('image/png', 1.0);
+
+        // Write the complete HTML with the image to the window
+        newWindow.document.open();
+        newWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${filename}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: monospace;
+        }
+        img {
+            max-width: 90%;
+            max-height: 80vh;
+            display: block;
+            cursor: pointer;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        .download-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: white;
+            color: #234fde;
+            border: 1px solid #234fde;
+            font-family: monospace;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .download-btn:hover {
+            background: #234fde;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <img src="${dataUrl}" alt="${filename}" id="nftImage">
+    <a href="${dataUrl}" download="${filename}" class="download-btn" id="downloadLink">DOWNLOAD</a>
+    <script>
+        // Allow clicking the image to download as well
+        document.getElementById('nftImage').addEventListener('click', function() {
+            document.getElementById('downloadLink').click();
+        });
+
+        // Also enable right-click context menu to work on the image
+        document.getElementById('nftImage').addEventListener('contextmenu', function(e) {
+            e.stopPropagation();
+        });
+    </script>
+</body>
+</html>`);
+        newWindow.document.close();
+    };
+
+    img.onerror = function(error) {
+        clearTimeout(loadTimeout);
+        newWindow.document.open();
+        newWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Error</title>
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        background: white;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
+                        font-family: monospace;
+                        color: #234fde;
+                    }
+                </style>
+            </head>
+            <body>
+                <div>Error rendering NFT artwork. Please try again.</div>
+            </body>
+            </html>
+        `);
+        newWindow.document.close();
+    };
+
+    img.src = svgUrl;
 }
 
 async function startup() {
