@@ -367,10 +367,15 @@ button:hover {
     border: 1px solid white;
 }
 
+.mint-title {
+    font-size: 12px;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
 .mint-amount {
     font-size: 12px;
-    margin-bottom: 8px;
-    font-weight: 500;
+    margin-bottom: 6px;
 }
 
 .mint-cost {
@@ -522,6 +527,7 @@ button:hover {
     #close-mint,
     #mint-limit-display,
     .mint-option-btn,
+    .mint-title,
     .mint-amount,
     .mint-cost,
     #mint-status,
@@ -637,9 +643,14 @@ button:hover {
         gap: 4px;
     }
 
+    .mint-title,
     .mint-amount,
     .mint-cost {
         margin-bottom: 0;
+    }
+
+    .mint-title {
+        margin-bottom: 4px;
     }
 
     .mint-amount {

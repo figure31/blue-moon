@@ -347,16 +347,16 @@ function updateMintButtonPrices() {
     const tokens1 = TOKENS_PER_MINT;
     const tokens8 = TOKENS_PER_MINT * 8;
 
-    // Update button text
+    // Update button text with new format
     const mint1Amount = document.querySelector('#mint-1-btn .mint-amount');
     const mint1Cost = document.querySelector('#mint-1-btn .mint-cost');
     const mint8Amount = document.querySelector('#mint-8-btn .mint-amount');
     const mint8Cost = document.querySelector('#mint-8-btn .mint-cost');
 
-    if (mint1Amount) mint1Amount.textContent = `Mint ${tokens1.toLocaleString()}`;
-    if (mint1Cost) mint1Cost.textContent = `${price1} USDC`;
-    if (mint8Amount) mint8Amount.textContent = `Mint ${tokens8.toLocaleString()}`;
-    if (mint8Cost) mint8Cost.textContent = `${price8} USDC`;
+    if (mint1Amount) mint1Amount.textContent = `${tokens1.toLocaleString()} $${TOKEN_SYMBOL || 'BLUE'}`;
+    if (mint1Cost) mint1Cost.textContent = `${price1} usdc`;
+    if (mint8Amount) mint8Amount.textContent = `${tokens8.toLocaleString()} $${TOKEN_SYMBOL || 'BLUE'}`;
+    if (mint8Cost) mint8Cost.textContent = `${price8} usdc`;
 }
 
 // ============================================
