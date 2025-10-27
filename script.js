@@ -359,6 +359,24 @@ function updateMintButtonPrices() {
     if (mint8Cost) mint8Cost.textContent = `${price8} usdc`;
 }
 
+/**
+ * Update max USDC approval amount dynamically
+ */
+function updateMaxUSDCApproval() {
+    if (!MAX_USDC_APPROVAL) return;
+
+    const maxUsdcApprovalElement = document.getElementById('max-usdc-approval');
+    if (!maxUsdcApprovalElement) return;
+
+    // Format USDC amount (6 decimals) with comma separators
+    const maxUsdcFormatted = parseFloat(ethers.utils.formatUnits(MAX_USDC_APPROVAL, 6)).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+
+    maxUsdcApprovalElement.textContent = maxUsdcFormatted;
+}
+
 // ============================================
 // WALLET CONNECTION
 // ============================================
@@ -2301,6 +2319,8 @@ async function startup() {
     await init();
     // Update mint button prices after DOM is ready
     updateMintButtonPrices();
+    // Update max USDC approval amount
+    updateMaxUSDCApproval();
     startAddressFeed();
     startMusic();
     startPolling();

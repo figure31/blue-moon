@@ -68,15 +68,15 @@
                 Mint: Base, available only to $BMOON owners, on-chain<br>
                 1,777,778 $BMOON per NFT mint<br>
                 Metadata: on-chain, dynamic<br>
-                Every mint comes with two 88x88 CM prints (or 44x44 CM) on Hahnemühle 300 GSM Photo Rag acid-free paper, printed with water-based archival ink. Shipping and duties not included. Get in touch with <a href="https://x.com/figure31_" target="_blank" style="text-decoration: underline;">figure31</a> for claims.</p>
+                Every mint comes with two 88x88 CM prints (or 44x44 CM) on Hahnemühle 300 GSM Photo Rag acid-free paper. Shipping and duties not included. Get in touch with <a href="https://x.com/figure31_" target="_blank" style="text-decoration: underline;">figure31</a> for claims.</p>
 
                 <p>***</p>
 
-                <p>Blue Moon ($BMOON) is a dual ERC20-ERC721 release. ERC20 mints are done in lots of 4,444 (1 lot) or 35,552 tokens (8 lots), and paid in USDC. Every lot minted also generates a random blue HSL color value stored on-chain via contract event logs, leaving behind an everlasting trace of each address's participation. The color data is indexed and used to deterministically generate a collectively-owned artwork shown on the homepage.</p>
+                <p>Blue Moon ($BMOON) is a dual ERC20-ERC721 release. ERC20 mints are done in lots of 4,444 (1 lot) or 35,552 tokens (8 lots), and paid in USDC. Every lot minted generates a random blue HSL color value stored on-chain via contract event logs, leaving behind an everlasting trace of each address's participation. The color data is indexed and used to deterministically generate a collectively-owned artwork shown on the homepage.</p>
 
-                <p>Owners of $BMOON tokens can claim/mint NFTs with the tokens they have acquired. The contract only accepts 1,777,778 $BMOON per mint, or 2% of the total token supply. Tokens spent for minting are taken out of circulation. The contract generates entirely on-chain dynamic art (base64 formatting). The artworks themselves are 22 x 22 grids of 242 unique random blue hues, used twice, and laid out with a pseudo-Fisher-Yates shuffle on-chain algorithm. The owner's address and the latest mined block are used as seeds to generate the hues, meaning that every time the artworks are generated via the contract's read function, the outputs change. There is no maximum number of prints collectors of these NFTs may order since these assets can produce an almost infinite amount of outputs.</p>
+                <p>Owners of $BMOON tokens can claim NFTs with the tokens they have minted. The contract only accepts 1,777,778 $BMOON per mint, or 2% of the total token supply. The contract generates entirely on-chain dynamic art (base64 SVG). The artworks are 22 x 22 grids of 242 unique random blue hues, used twice, and laid out with a pseudo-Fisher-Yates shuffle on-chain algorithm. The owner's address and the latest mined block are used as seeds to generate the hues. Every time the artworks are generated via the contract's read function, the outputs change. There is no maximum number of physical editions collectors of these NFTs can order.</p>
 
-                <p>Both ERC20 and ERC721 mints use the same HSL blue-tone range of: Hue 209-230° (22 variations), Saturation 37-100% (11 variations), Lightness 20-63% (44 variations).</p>
+                <p>Both ERC20 and ERC721 contracts use the same HSL blue-tone range of: Hue 209-230° (22 variations), Saturation 37-100% (11 variations), Lightness 20-63% (44 variations).</p>
 
                 <p>***</p>
 
@@ -85,7 +85,13 @@
                 <p>In 1973, Gerhard Richter created "4096 Farben", a systematic grid exploration of colour liberated from compositional intent. He collected samples of commercial paint, assigned numbers to the colours, placed them in a box, and drew at random to determine each colour's position. The canvas's subdivision and proportions were achieved through continual subdivision by equal gradations. The result: a grid where each colour adapts to whichever other colour is used. Colours are laid bare from their representational value and treated as ready-mades. With these constraints, the role and judgement of the painter in the making of the image is put into question.</p>
 
                 <p>Fifty-two years later, Blue Moon approaches a grid arrangement of colours in a similar detached manner. The choice of blue, determined by the commercial nature of the network on which the release is made, the title, taken from an Elvis Presley song looped endlessly on the page, and the simplistic nature of the generative grid output seem almost satirical. The artwork does two things. First, it recontextualizes common on-chain experiences, such as token minting and on-chain generative art. Second, it defines a range of digital colours using a set of self-referential values and arranges them according to different rules and input parameters: randomness, deterministic shuffling, equal representation, and live blockchain data. The artist's hand gives way to algorithmic fairness and the chaotic, evolving nature of blockchain events. A part of the creation process is deferred to collectors and the blockchain itself, who act as active participants in the making of the artworks. Like "4096 Farben", these pieces sit between accumulation and distribution, calculation and randomness, system and chaos. The artist's judgment and creative role are laid aside, almost arbitrarily. The lack of determinism is further enhanced by the refusal to confine the generative outputs of the NFTs to a fixed outcome.</p>
-                
+
+                <p class="section-title">Technical note</p>
+
+                <p>The self-referential selection of numbers across the whole system can be compiled as such: a token supply of 88,888,888, minted in lots of 4,444 tokens (for $0.88), creating a collective grid of 20,002 colours with HSL range variations of 22-11-44, a 2% token supply NFT mint fee, outputs composed of 242 colors, each appearing exactly twice, arranged on a 22×22 grid of 484 cells, limited to 22 public editions and 4 artist proofs, physical editions offered at 88×88 cm or 44×44 cm (2 prints given for free), a duochrome site, the Layer 2 network chosen for this release, the dual ERC20/721 format, etc.</p>
+
+                <p>The 8-4-2-1 cascade—creates a closed symbolic universe. The artist's intent does not appear to be numerical harmony, but rather creative arbitrariness and submission. The numbers are simultaneously meaningless (they could be substituted) and meaningful (they relate to each other). They exist in a system where constraint becomes content, where the technical parameters are part of the artwork as much as the visual output—a meditation on cryptocurrency's obsession with scarcity, supply caps, and numerical fetishism, rendered through the artistic legacy of systematic colour explorations.</p>
+
                 <p>***</p>
 
                 <p class="section-title">Minting the ERC20</p>
@@ -98,7 +104,7 @@
 
                 <p class="section-title">If you prefer not to use the frontend, you can interact with the contracts directly via BaseScan:</p>
 
-                <p><a id="usdc-contract-link" href="#" target="_blank" style="text-decoration: underline;">USDC</a> (approve the $BMOON contract to spend up to 1,549 USDC for max mint)<br>
+                <p><a id="usdc-contract-link" href="#" target="_blank" style="text-decoration: underline;">USDC</a> (approve the $BMOON contract to spend up to <span id="max-usdc-approval">...</span> USDC for max mint)<br>
                 <a id="bmoon-erc20-link" href="#" target="_blank" style="text-decoration: underline;">$BMOON ERC20</a> (use the mint write function and input either 1 or 8 for lot size)<br>
                 <a id="bmoon-erc721-link" href="#" target="_blank" style="text-decoration: underline;">$BMOON ERC721</a> (first, approve the ERC721 contract to spend 1,777,778 $BMOON on the ERC20 contract, second, use the mint function)</p>
 
