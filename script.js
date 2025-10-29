@@ -186,9 +186,9 @@ async function getAllColors() {
 
 ===== END COMMENTED OUT CODE ===== */
 
-/**
+/* ===== COMMENTED OUT: Address Feed Functions (No Longer Used) =====
  * Get recent mint transactions for activity feed
- */
+
 async function getRecentTransactions() {
     const query = `
         query GetRecentActivity {
@@ -209,6 +209,7 @@ async function getRecentTransactions() {
     const data = await querySubgraph(query);
     return data?.mintTransactions || [];
 }
+===== END COMMENTED OUT CODE ===== */
 
 /**
  * Get user stats from subgraph
@@ -877,7 +878,8 @@ let blueShades = [];
 // Global stats cache
 let globalStats = null;
 let previousGlobalStats = null; // Track previous values for incremental updates
-let recentTransactions = [];
+// Commented out - address feed no longer used
+// let recentTransactions = [];
 
 // Animation state
 let currentIndex = 0;
@@ -1082,9 +1084,9 @@ async function loadGlobalStats() {
 }
 ===== END COMMENTED OUT CODE ===== */
 
-/**
+/* ===== COMMENTED OUT: Load Recent Transactions (No Longer Used) =====
  * Load recent transactions for activity feed
- */
+
 async function loadRecentTransactions() {
     const transactions = await getRecentTransactions();
 
@@ -1095,6 +1097,7 @@ async function loadRecentTransactions() {
 
     recentTransactions = transactions;
 }
+===== END COMMENTED OUT CODE ===== */
 
 /**
  * Shuffle array in place
@@ -1268,14 +1271,14 @@ async function init() {
     drawGrid();
     hideUnusedCells();  // Hide unused cells immediately
 
-    // Load remaining data (colors from JSON, transactions from subgraph)
+    // Load remaining data (colors from JSON)
     await Promise.all([
-        loadColorsFromJSON(),
-        loadRecentTransactions()
+        loadColorsFromJSON()
+        // loadRecentTransactions() - Commented out, no longer used
     ]);
 
-    // Update address feed
-    updateAddressFeed();
+    // Update address feed - Commented out, no longer used
+    // updateAddressFeed();
 
     // Start animations simultaneously after a brief delay
     setTimeout(() => {
@@ -1340,8 +1343,9 @@ const progressCounter = document.getElementById('progress-counter');
 const colorsCounter = document.getElementById('colors-counter');
 const valueCounter = document.getElementById('value-counter');
 const mintersCounter = document.getElementById('minters-counter');
-const addressFeed = document.getElementById('address-feed');
-const addressLink = document.querySelector('.address-link');
+// Commented out - address feed no longer used
+// const addressFeed = document.getElementById('address-feed');
+// const addressLink = document.querySelector('.address-link');
 const aboutBtn = document.getElementById('about-btn');
 const aboutModal = document.getElementById('about-modal');
 const closeAbout = document.getElementById('close-about');
@@ -1519,10 +1523,10 @@ function animateCounters(fromZero = false) {
     animate();
 }
 
-/**
+/* ===== COMMENTED OUT: Address Feed Display Functions (No Longer Used) =====
  * Format address for display (0x1234...5678)
  * Shorter format on mobile (0x12...78)
- */
+
 function formatAddress(address) {
     if (!address || address.length < 10) return '0x0000...0000';
 
@@ -1535,9 +1539,8 @@ function formatAddress(address) {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-/**
  * Update address feed with real transaction data
- */
+
 let currentTxIndex = 0;
 
 function updateAddressFeed() {
@@ -1575,6 +1578,7 @@ function startAddressFeed() {
         updateAddressFeed();
     }, 3000);
 }
+===== END COMMENTED OUT CODE ===== */
 
 /**
  * Close all modals and show canvas
@@ -1758,11 +1762,11 @@ async function refreshData() {
     const previousTokens = globalStats ? Math.floor(parseInt(globalStats.totalTokensMinted) / 1e18) : 0;
     previousGlobalStats = globalStats ? { ...globalStats } : null;
 
-    // Refresh all data (colors from JSON cache, stats from subgraph)
+    // Refresh all data (colors from JSON cache, stats from static values)
     await Promise.all([
         loadColorsFromJSON(),
-        loadGlobalStats(),
-        loadRecentTransactions()
+        loadGlobalStats()
+        // loadRecentTransactions() - Commented out, no longer used
     ]);
 
     // Check if there are new colors
@@ -1867,11 +1871,23 @@ async function loadArtworkGallery() {
         // Clear the grid
         artworkGrid.innerHTML = '';
 
-        // Create boxes for all NFTs (0 to totalSupply-1)
-        for (let tokenId = 0; tokenId < totalSupply; tokenId++) {
+        // Create placeholder boxes for all NFTs first (fast, prevents blank space)
+        const placeholders = [];
+        for (let tokenId = totalSupply - 1; tokenId >= 0; tokenId--) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'nft-box';
+            placeholder.innerHTML = '<div class="nft-artwork unminted">loading...</div>';
+            artworkGrid.appendChild(placeholder);
+            placeholders.push({ element: placeholder, tokenId });
+        }
+
+        // Load actual NFT content and replace placeholders (reversed: totalSupply-1 to 0)
+        // This shows unminted NFTs first (faster loading) and minted ones below (slower SVG loading)
+        for (let i = 0; i < placeholders.length; i++) {
+            const { element, tokenId } = placeholders[i];
             const isMinted = tokenId < totalMinted;
             const nftBox = await createNFTBox(tokenId, isMinted, nftContract);
-            artworkGrid.appendChild(nftBox);
+            element.replaceWith(nftBox);
         }
 
     } catch (error) {
@@ -1902,20 +1918,6 @@ async function createNFTBox(tokenId, isMinted, nftContract) {
             const traitsDiv = document.createElement('div');
             traitsDiv.className = 'nft-traits';
 
-            const addressTrait = document.createElement('div');
-            addressTrait.className = 'nft-trait';
-            addressTrait.innerHTML = `
-                <span class="trait-label">minter:</span>
-                <span class="trait-value">${shortenAddress(metadata.minter)}</span>
-            `;
-
-            const blockTrait = document.createElement('div');
-            blockTrait.className = 'nft-trait';
-            blockTrait.innerHTML = `
-                <span class="trait-label">block:</span>
-                <span class="trait-value">${metadata.blockNumber}</span>
-            `;
-
             const tokenIdTrait = document.createElement('div');
             tokenIdTrait.className = 'nft-trait';
             tokenIdTrait.innerHTML = `
@@ -1923,8 +1925,6 @@ async function createNFTBox(tokenId, isMinted, nftContract) {
                 <span class="trait-value">${tokenId}</span>
             `;
 
-            traitsDiv.appendChild(addressTrait);
-            traitsDiv.appendChild(blockTrait);
             traitsDiv.appendChild(tokenIdTrait);
 
             // Create view button
@@ -1935,9 +1935,19 @@ async function createNFTBox(tokenId, isMinted, nftContract) {
                 openNFTInNewTab(metadata.svg, tokenId);
             });
 
+            // Create marketplace button
+            const marketplaceBtn = document.createElement('button');
+            marketplaceBtn.className = 'nft-view-btn';
+            marketplaceBtn.textContent = 'marketplace';
+            marketplaceBtn.addEventListener('click', () => {
+                const openseaUrl = `https://opensea.io/item/base/${BLUEMOON_NFT_CONTRACT.toLowerCase()}/${tokenId}`;
+                window.open(openseaUrl, '_blank');
+            });
+
             box.appendChild(artworkDiv);
             box.appendChild(traitsDiv);
             box.appendChild(viewBtn);
+            box.appendChild(marketplaceBtn);
 
         } catch (error) {
             console.error(`Error loading NFT #${tokenId}:`, error);
@@ -1945,27 +1955,10 @@ async function createNFTBox(tokenId, isMinted, nftContract) {
         }
 
     } else {
-        // NFT not minted yet
+        // NFT not minted yet (token ID hidden - contract mints sequentially)
         const artworkDiv = document.createElement('div');
         artworkDiv.className = 'nft-artwork unminted';
         artworkDiv.textContent = 'not minted yet';
-
-        const traitsDiv = document.createElement('div');
-        traitsDiv.className = 'nft-traits';
-        traitsDiv.innerHTML = `
-            <div class="nft-trait">
-                <span class="trait-label">minter:</span>
-                <span class="trait-value">-</span>
-            </div>
-            <div class="nft-trait">
-                <span class="trait-label">block:</span>
-                <span class="trait-value">-</span>
-            </div>
-            <div class="nft-trait">
-                <span class="trait-label">token id:</span>
-                <span class="trait-value">${tokenId}</span>
-            </div>
-        `;
 
         const mintBtn = document.createElement('button');
         mintBtn.className = 'nft-view-btn mint-style';
@@ -1975,7 +1968,6 @@ async function createNFTBox(tokenId, isMinted, nftContract) {
         });
 
         box.appendChild(artworkDiv);
-        box.appendChild(traitsDiv);
         box.appendChild(mintBtn);
     }
 
@@ -2359,7 +2351,7 @@ async function startup() {
     updateMintButtonPrices();
     // Update max USDC approval amount
     updateMaxUSDCApproval();
-    startAddressFeed();
+    // startAddressFeed(); - Commented out, no longer used
     startMusic();
     startPolling();
 }
