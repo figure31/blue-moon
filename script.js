@@ -5,19 +5,17 @@ const GRID_COLOR = '#e0e0e0'; // Thin grey for grid lines
 const GRID_LINE_WIDTH = 0.5;
 const SQUARES_PER_FRAME = 3; // Speed of animation (reduced for smoother effect)
 
-// Subgraph Configuration (update URL when deploying mainnet subgraph)
-const SUBGRAPH_URL = 'https://subgraph.satsuma-prod.com/64e5e72824d3/figure31--8074/bluemoon-subgraph/api';
+// Subgraph Configuration (Base Mainnet)
+const SUBGRAPH_URL = 'https://subgraph.satsuma-prod.com/64e5e72824d3/figure31--8074/bluemoon-mainnet/api';
 const POLL_INTERVAL = 15000; // 15 seconds
 
 // ============================================
 // ⭐ DEPLOYMENT CONFIGURATION ⭐
 // ============================================
-// When deploying to mainnet, change BOTH values below:
-// 1. Set NETWORK to 'mainnet'
-// 2. Update BLUEMOON_CONTRACT to mainnet address
+// MAINNET DEPLOYMENT - Base Network
 // ============================================
 
-const NETWORK = 'testnet'; // 'testnet' or 'mainnet'
+const NETWORK = 'mainnet'; // 'testnet' or 'mainnet'
 
 // Network configurations
 const NETWORKS = {
@@ -40,11 +38,11 @@ const CURRENT_NETWORK = NETWORKS[NETWORK];
 const BASE_CHAIN_ID = CURRENT_NETWORK.chainId;
 const BASE_RPC = CURRENT_NETWORK.rpc;
 
-// BlueMoon Contract Address (change for mainnet deployment)
-const BLUEMOON_CONTRACT = '0xA07c1b9eb264D6A898B9e7dAB1F4Fd01e0A12a71';
+// BlueMoon ERC20 Contract Address (Base Mainnet)
+const BLUEMOON_CONTRACT = '0x9A2911782063285bb7d8a4d088a1FbB94bB8c6E8';
 
-// BlueMoon NFT Contract Address (Base Sepolia testnet)
-const BLUEMOON_NFT_CONTRACT = '0x0ec66b8E25Cb3e6C8D83B95873a6EF455e5780c9';
+// BlueMoon NFT Contract Address (Base Mainnet)
+const BLUEMOON_NFT_CONTRACT = '0x25EB12BB284917BAF02447532FcEDEA3Bf9E19e8';
 
 // ERC20 ABI for token interactions
 const ERC20_ABI = [
