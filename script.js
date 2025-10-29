@@ -793,16 +793,7 @@ async function handleMint(amount) {
         // Calculate required USDC amount
         const requiredAmount = ethers.BigNumber.from(MINT_PRICE_USDC).mul(amount);
 
-        // Check USDC balance
-        const usdcBalance = await getUSDCBalance(userAddress);
-        const usdcBalanceWei = ethers.utils.parseUnits(usdcBalance, 6);
-
-        if (usdcBalanceWei.lt(requiredAmount)) {
-            mintStatus.textContent = 'insufficient USDC balance';
-            return;
-        }
-
-        // Check allowance
+        // Check allowance (contract will validate USDC balance on-chain)
         const hasAllowance = await checkUSDCAllowance(requiredAmount);
 
         if (!hasAllowance) {
