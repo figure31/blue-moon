@@ -1063,7 +1063,7 @@ async function loadGlobalStats() {
         totalTokensMinted: '88888888000000000000000000', // 88,888,888 BLUE (18 decimals)
         remainingTokens: '0',
         totalUSDCCollected: '17601.76', // 20,002 mints × 0.88 USDC
-        uniqueMinters: '94', // Final number of unique minters
+        uniqueMinters: '67', // Final number of unique minters
         totalMintTransactions: '20002',
         totalColorsMinted: '20002'
     };
