@@ -126,6 +126,8 @@ async function querySubgraph(query, variables = {}) {
 /**
  * Get global statistics
  */
+/* ===== COMMENTED OUT: Subgraph Query Functions (Using JSON Now) =====
+
 async function getGlobalStats() {
     const query = `
         query GetGlobalStats {
@@ -145,9 +147,6 @@ async function getGlobalStats() {
     return data?.globalStats || null;
 }
 
-/**
- * Get all colors (paginated)
- */
 async function getAllColors() {
     const allColors = [];
     const batchSize = 1000;
@@ -184,6 +183,8 @@ async function getAllColors() {
 
     return allColors;
 }
+
+===== END COMMENTED OUT CODE ===== */
 
 /**
  * Get recent mint transactions for activity feed
@@ -986,9 +987,40 @@ function hash(input) {
 }
 
 /**
- * Load minted colors from subgraph
- * Fetches all ColorMinted events and builds the color array
+ * Load minted colors from static JSON file
+ * Project minted out - using cached data for performance
  */
+async function loadColorsFromJSON() {
+    try {
+        const response = await fetch('colors-data.json');
+        const data = await response.json();
+        const colors = data.colors;
+
+        if (!colors || colors.length === 0) {
+            blueShades = [];
+            return;
+        }
+
+        // Initialize array with empty values
+        blueShades = new Array(TOTAL_SQUARES).fill(null);
+
+        // Fill in the minted colors at their correct positions
+        colors.forEach(colorData => {
+            const mintId = parseInt(colorData.mintId);
+            if (mintId >= 0 && mintId < TOTAL_SQUARES) {
+                blueShades[mintId] = colorData.color;
+            }
+        });
+    } catch (error) {
+        console.error('Error loading colors from JSON:', error);
+        blueShades = [];
+    }
+}
+
+/* ===== COMMENTED OUT: Subgraph Code (Project Minted Out) =====
+ * Original function that queried live subgraph data.
+ * Kept for reference but replaced with static JSON for performance.
+
 async function loadColorsFromSubgraph() {
     const colors = await getAllColors();
 
@@ -1008,10 +1040,26 @@ async function loadColorsFromSubgraph() {
         }
     });
 }
+===== END COMMENTED OUT CODE ===== */
 
 /**
- * Load global statistics from subgraph
+ * Load global statistics - STATIC (Project Minted Out)
+ * Using final values since all 20,002 mints completed
  */
+async function loadGlobalStats() {
+    // Static final values - project fully minted out
+    globalStats = {
+        totalTokensMinted: '88888888000000000000000000', // 88,888,888 BLUE (18 decimals)
+        remainingTokens: '0',
+        totalUSDCCollected: '17601.76', // 20,002 mints × 0.88 USDC
+        uniqueMinters: '0', // Calculate from colors-data.json if needed
+        totalMintTransactions: '20002',
+        totalColorsMinted: '20002'
+    };
+}
+
+/* ===== COMMENTED OUT: Original Dynamic Stats Loading =====
+
 async function loadGlobalStats() {
     const stats = await getGlobalStats();
 
@@ -1032,6 +1080,7 @@ async function loadGlobalStats() {
     // TOTAL_SQUARES is now read directly from contract on page load
     // No need to update from subgraph
 }
+===== END COMMENTED OUT CODE ===== */
 
 /**
  * Load recent transactions for activity feed
@@ -1219,9 +1268,9 @@ async function init() {
     drawGrid();
     hideUnusedCells();  // Hide unused cells immediately
 
-    // Load remaining data from subgraph
+    // Load remaining data (colors from JSON, transactions from subgraph)
     await Promise.all([
-        loadColorsFromSubgraph(),
+        loadColorsFromJSON(),
         loadRecentTransactions()
     ]);
 
@@ -1709,9 +1758,9 @@ async function refreshData() {
     const previousTokens = globalStats ? Math.floor(parseInt(globalStats.totalTokensMinted) / 1e18) : 0;
     previousGlobalStats = globalStats ? { ...globalStats } : null;
 
-    // Refresh all data
+    // Refresh all data (colors from JSON cache, stats from subgraph)
     await Promise.all([
-        loadColorsFromSubgraph(),
+        loadColorsFromJSON(),
         loadGlobalStats(),
         loadRecentTransactions()
     ]);
