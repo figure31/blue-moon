@@ -44,6 +44,9 @@ const BLUEMOON_CONTRACT = '0x9A2911782063285bb7d8a4d088a1FbB94bB8c6E8';
 // BlueMoon NFT Contract Address (Base Mainnet)
 const BLUEMOON_NFT_CONTRACT = '0x25EB12BB284917BAF02447532FcEDEA3Bf9E19e8';
 
+// BlueMoon Total Canvas Contract Address (Base Mainnet)
+const BLUEMOON_TOTAL_CONTRACT = '0x741EaFaa3e74C0e03B580CD73Bd45bd2BeEA1716';
+
 // ERC20 ABI for token interactions
 const ERC20_ABI = [
     'function balanceOf(address owner) view returns (uint256)',
@@ -73,6 +76,16 @@ const BLUEMOON_NFT_ABI = [
     'function ARTIST_PROOFS() view returns (uint256)',
     'function blueToken() view returns (address)',
     'function mint()'
+];
+
+// BlueMoon Total Canvas Contract ABI
+const BLUEMOON_TOTAL_ABI = [
+    'function buyCanvas()',
+    'function distributePayouts()',
+    'function sold() view returns (bool)',
+    'function finalized() view returns (bool)',
+    'function SALE_PRICE() view returns (uint256)',
+    'function usdc() view returns (address)'
 ];
 
 // Dynamic values read from contract (initialized on page load)
@@ -498,24 +511,25 @@ async function updateWalletUI() {
     walletMinted.textContent = `${blueAmount.toLocaleString()} $${TOKEN_SYMBOL || 'BLUE'}`;
     walletUsdc.textContent = `${parseFloat(usdcBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
 
-    // Highlight feature disabled (requires subgraph data for mintIds)
-    highlightBtn.style.display = 'none';
-    userMintIds = [];
+    // Highlight feature - filter colors by connected wallet address
+    if (allColorsData && allColorsData.length > 0) {
+        // Find all colors minted by this user (case-insensitive comparison)
+        const userColors = allColorsData.filter(colorData =>
+            colorData.minter.toLowerCase() === userAddress.toLowerCase()
+        );
 
-    /* ===== COMMENTED OUT: Subgraph User Stats (No Longer Used) =====
-    // Get user stats from subgraph
-    const userStats = await getUserStats(userAddress);
-    // Cache user stats for mint modal display
-    cachedUserStats = userStats;
-    // Store user's mintIds for highlight feature
-    if (userStats && userStats.mintIds && userStats.mintIds.length > 0) {
-        userMintIds = userStats.mintIds.map(id => parseInt(id));
-        highlightBtn.style.display = 'inline-block';
+        // Extract mintIds
+        if (userColors.length > 0) {
+            userMintIds = userColors.map(colorData => parseInt(colorData.mintId));
+            highlightBtn.style.display = 'inline-block';
+        } else {
+            userMintIds = [];
+            highlightBtn.style.display = 'none';
+        }
     } else {
         userMintIds = [];
         highlightBtn.style.display = 'none';
     }
-    ===== END COMMENTED OUT CODE ===== */
 
 }
 
@@ -883,6 +897,8 @@ let offsetX, offsetY;
 
 // Blue shades array
 let blueShades = [];
+// Full color data with minter addresses (for highlight feature)
+let allColorsData = [];
 
 // Global stats cache
 let globalStats = null;
@@ -1009,8 +1025,12 @@ async function loadColorsFromJSON() {
 
         if (!colors || colors.length === 0) {
             blueShades = [];
+            allColorsData = [];
             return;
         }
+
+        // Store full color data for highlight feature
+        allColorsData = colors;
 
         // Initialize array with empty values
         blueShades = new Array(TOTAL_SQUARES).fill(null);
@@ -1025,6 +1045,7 @@ async function loadColorsFromJSON() {
     } catch (error) {
         console.error('Error loading colors from JSON:', error);
         blueShades = [];
+        allColorsData = [];
     }
 }
 
@@ -1063,7 +1084,7 @@ async function loadGlobalStats() {
         totalTokensMinted: '88888888000000000000000000', // 88,888,888 BLUE (18 decimals)
         remainingTokens: '0',
         totalUSDCCollected: '17601.76', // 20,002 mints × 0.88 USDC
-        uniqueMinters: '94', // Final number of unique minters
+        uniqueMinters: '67', // Final number of unique minters
         totalMintTransactions: '20002',
         totalColorsMinted: '20002'
     };
@@ -1370,6 +1391,12 @@ const claimArtworkBtn = document.getElementById('claim-artwork-btn');
 const artworkModal = document.getElementById('artwork-modal');
 const closeArtwork = document.getElementById('close-artwork');
 const artworkGrid = document.getElementById('artwork-grid');
+const buyTotalBtn = document.getElementById('buy-total-btn');
+const buyTotalModal = document.getElementById('buy-total-modal');
+const closeBuyTotal = document.getElementById('close-buy-total');
+const buyCanvasBtn = document.getElementById('buy-canvas-btn');
+const distributePayoutsBtn = document.getElementById('distribute-payouts-btn');
+const buyTotalStatus = document.getElementById('buy-total-status');
 
 /**
  * Initialize all blockchain explorer links based on network configuration
@@ -1586,6 +1613,7 @@ function closeAllModals() {
     aboutModal.classList.remove('active');
     mintModal.classList.remove('active');
     artworkModal.classList.remove('active');
+    buyTotalModal.classList.remove('active');
     canvas_element.style.display = 'block';
 }
 
@@ -1614,6 +1642,32 @@ claimArtworkBtn.addEventListener('click', async () => {
 
 closeArtwork.addEventListener('click', () => {
     closeAllModals();
+});
+
+/**
+ * Buy Total NFT modal handlers
+ */
+buyTotalBtn.addEventListener('click', async () => {
+    buyTotalModal.classList.add('active');
+    // Note: canvas stays visible (modal appears on top)
+
+    // Check if canvas is already sold
+    await checkTotalCanvasStatus();
+});
+
+closeBuyTotal.addEventListener('click', () => {
+    buyTotalModal.classList.remove('active');
+    buyTotalStatus.textContent = '';
+});
+
+// Buy canvas button handler
+buyCanvasBtn.addEventListener('click', async () => {
+    await buyCanvas();
+});
+
+// Distribute payouts button handler
+distributePayoutsBtn.addEventListener('click', async () => {
+    await distributePayouts();
 });
 
 /**
@@ -2119,6 +2173,171 @@ async function mintNFT(tokenId, buttonElement) {
         setTimeout(() => {
             buttonElement.textContent = 'claim/mint';
         }, 2000);
+    }
+}
+
+/**
+ * Check Total Canvas status and update UI accordingly
+ */
+async function checkTotalCanvasStatus() {
+    try {
+        // Connect to contract using default provider (no wallet needed for reading)
+        const defaultProvider = new ethers.providers.JsonRpcProvider(BASE_RPC);
+        const totalContract = new ethers.Contract(BLUEMOON_TOTAL_CONTRACT, BLUEMOON_TOTAL_ABI, defaultProvider);
+
+        // Check if sold
+        const sold = await totalContract.sold();
+
+        if (sold) {
+            // Canvas already sold - hide buy button and show message
+            buyCanvasBtn.style.display = 'none';
+            buyTotalStatus.textContent = '✅ Canvas already purchased! You can still distribute payouts below.';
+        } else {
+            // Canvas available - show buy button
+            buyCanvasBtn.style.display = 'flex';
+            buyCanvasBtn.disabled = false;
+            buyCanvasBtn.innerHTML = '<div class="mint-title">BUY CANVAS</div><div class="mint-cost">8,888.00 USDC</div>';
+            buyTotalStatus.textContent = '';
+        }
+
+    } catch (error) {
+        console.error('Error checking canvas status:', error);
+        buyTotalStatus.textContent = 'Error checking status';
+    }
+}
+
+/**
+ * Buy the Total Canvas NFT (requires wallet connection and USDC approval)
+ */
+async function buyCanvas() {
+    try {
+        // Check if wallet is connected
+        if (!isWalletConnected || !signer) {
+            buyTotalStatus.textContent = 'Connect wallet first';
+            return;
+        }
+
+        buyCanvasBtn.disabled = true;
+        buyTotalStatus.textContent = 'Checking contract status...';
+
+        // Connect to contracts
+        const totalContract = new ethers.Contract(BLUEMOON_TOTAL_CONTRACT, BLUEMOON_TOTAL_ABI, signer);
+        const usdcAddress = await totalContract.usdc();
+        const usdcContract = new ethers.Contract(usdcAddress, ERC20_ABI, signer);
+
+        // Check if already sold
+        const sold = await totalContract.sold();
+        if (sold) {
+            buyTotalStatus.textContent = 'Canvas already sold';
+            buyCanvasBtn.disabled = false;
+            return;
+        }
+
+        // Get sale price
+        const salePrice = await totalContract.SALE_PRICE();
+        const address = await signer.getAddress();
+
+        // Check USDC balance
+        buyTotalStatus.textContent = 'Checking USDC balance...';
+        const balance = await usdcContract.balanceOf(address);
+
+        if (balance.lt(salePrice)) {
+            buyTotalStatus.textContent = 'Insufficient USDC balance';
+            buyCanvasBtn.disabled = false;
+            return;
+        }
+
+        // Check USDC approval
+        buyTotalStatus.textContent = 'Checking USDC approval...';
+        const allowance = await usdcContract.allowance(address, BLUEMOON_TOTAL_CONTRACT);
+
+        if (allowance.lt(salePrice)) {
+            // Need approval
+            buyTotalStatus.textContent = 'Approve USDC...';
+            const approveTx = await usdcContract.approve(BLUEMOON_TOTAL_CONTRACT, salePrice);
+            buyTotalStatus.textContent = 'Approving USDC...';
+            await approveTx.wait();
+            buyTotalStatus.textContent = 'USDC approved!';
+        }
+
+        // Buy canvas
+        buyTotalStatus.textContent = 'Buying canvas...';
+        const buyTx = await totalContract.buyCanvas();
+        buyTotalStatus.textContent = 'Confirming transaction...';
+        await buyTx.wait();
+
+        buyTotalStatus.textContent = '🎉 Canvas purchased successfully!';
+        buyCanvasBtn.disabled = true;
+        buyCanvasBtn.textContent = 'SOLD';
+
+    } catch (error) {
+        console.error('Error buying canvas:', error);
+
+        let errorMessage = 'Error - try again';
+        if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
+            errorMessage = 'Transaction rejected';
+        } else if (error.code === 'INSUFFICIENT_FUNDS' || error.code === -32000) {
+            errorMessage = 'Insufficient ETH for gas';
+        } else if (error.message && error.message.includes('AlreadySold')) {
+            errorMessage = 'Canvas already sold';
+        }
+
+        buyTotalStatus.textContent = errorMessage;
+        buyCanvasBtn.disabled = false;
+    }
+}
+
+/**
+ * Distribute payouts to all minters
+ */
+async function distributePayouts() {
+    try {
+        // Check if wallet is connected
+        if (!isWalletConnected || !signer) {
+            buyTotalStatus.textContent = 'Connect wallet first';
+            return;
+        }
+
+        distributePayoutsBtn.disabled = true;
+        buyTotalStatus.textContent = 'Checking contract status...';
+
+        // Connect to contract
+        const totalContract = new ethers.Contract(BLUEMOON_TOTAL_CONTRACT, BLUEMOON_TOTAL_ABI, signer);
+
+        // Check if sold
+        const sold = await totalContract.sold();
+        if (!sold) {
+            buyTotalStatus.textContent = 'Canvas not sold yet';
+            distributePayoutsBtn.disabled = false;
+            return;
+        }
+
+        // Distribute payouts
+        buyTotalStatus.textContent = 'Distributing payouts to all minters...';
+        const distributeTx = await totalContract.distributePayouts();
+        buyTotalStatus.textContent = 'Confirming transaction...';
+        await distributeTx.wait();
+
+        buyTotalStatus.textContent = '✅ Payouts distributed to all 67 minters!';
+        distributePayoutsBtn.disabled = true;
+        distributePayoutsBtn.textContent = 'DISTRIBUTED';
+
+    } catch (error) {
+        console.error('Error distributing payouts:', error);
+
+        let errorMessage = 'Error - try again';
+        if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
+            errorMessage = 'Transaction rejected';
+        } else if (error.code === 'INSUFFICIENT_FUNDS' || error.code === -32000) {
+            errorMessage = 'Insufficient ETH for gas';
+        } else if (error.message && error.message.includes('AlreadyDistributed')) {
+            errorMessage = 'Already distributed';
+        } else if (error.message && error.message.includes('NotSoldYet')) {
+            errorMessage = 'Canvas not sold yet';
+        }
+
+        buyTotalStatus.textContent = errorMessage;
+        distributePayoutsBtn.disabled = false;
     }
 }
 

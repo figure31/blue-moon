@@ -51,15 +51,17 @@
                     <button id="about-btn">about</button>
                     <a id="contract-erc20-link" href="#" class="link-button" target="_blank">contract erc20</a>
                     <a id="contract-erc721-link" href="#" class="link-button" target="_blank">contract erc721</a>
+                    <a id="contract-total-link" href="https://basescan.org/address/0x741EaFaa3e74C0e03B580CD73Bd45bd2BeEA1716" class="link-button" target="_blank">contract total erc721</a>
                 </div>
                 <div id="bottom-center">
                     <button id="claim-artwork-btn">view/claim NFT</button>
+                    <button id="buy-total-btn">buy total NFT</button>
                 </div>
                 <div id="bottom-right">
                     <button id="connect-btn">connect</button>
                     <div id="wallet-info">
                         <span id="wallet-minted">0 $BLUE minted</span>
-                        <button id="highlight-btn" style="display:none;">highlight</button>
+                        <button id="highlight-btn">highlight</button>
                         <span id="wallet-usdc">0 USDC</span>
                         <span id="wallet-address">0x0000...0000</span>
                     </div>
@@ -73,19 +75,25 @@
                 <p class="section-title">Created by <a href="https://x.com/figure31_" target="_blank" style="text-decoration: underline;">figure31</a>, 2025</p>
                 <p>BLUE MOON, $BMOON ERC20<br>
                 Supply: 88,888,888<br>
-                Mint: Base, public, on-chain<br>
+                Mint: Base, public<br>
                 0.88 USDC per lot of 4444 $BMOON, 20,002 lots available</p>
+
+                <p>BLUE MOON Total, $BMOON ERC721<br>
+                Supply: 1<br>
+                Mint: Base, public<br>
+                Metadata: on-chain, fixed<br>
+                8,888 USDC, sale proceeds are proportionally distributed to all minters of the ERC20. Comes with one 88x88 CM print on Hahnemühle 300 GSM Photo Rag acid-free paper. Get in touch with <a href="https://x.com/figure31_" target="_blank" style="text-decoration: underline;">figure31</a> for shipping details.</p>
 
                 <p>BLUE MOON, $BMOON ERC721<br>
                 Supply: 22 + 4 AP<br>
-                Mint: Base, available only to $BMOON owners, on-chain<br>
+                Mint: Base, available only to $BMOON owners<br>
                 1,777,778 $BMOON per NFT mint<br>
                 Metadata: on-chain, dynamic<br>
-                Every mint comes with two 88x88 CM prints (or 44x44 CM) on Hahnemühle 300 GSM Photo Rag acid-free paper. Shipping and duties not included. Get in touch with <a href="https://x.com/figure31_" target="_blank" style="text-decoration: underline;">figure31</a> for claims.</p>
+                Every mint comes with two 44x44 CM prints on Hahnemühle 300 GSM Photo Rag acid-free paper. Shipping and duties not included. Get in touch with <a href="https://x.com/figure31_" target="_blank" style="text-decoration: underline;">figure31</a> for claims.</p>
 
                 <p>***</p>
 
-                <p>Blue Moon ($BMOON) is a dual ERC20-ERC721 release. ERC20 mints are done in lots of 4,444 (1 lot) or 35,552 tokens (8 lots), and paid in USDC. Every lot minted generates a random blue HSL color value stored on-chain via contract event logs, leaving behind an everlasting trace of each address's participation. The color data is indexed and used to deterministically generate a collectively-owned artwork shown on the homepage.</p>
+                <p>Blue Moon ($BMOON) is a dual ERC20-ERC721 release. ERC20 mints are done in lots of 4,444 (1 lot) or 35,552 tokens (8 lots), and paid in USDC. Every lot minted generates a random blue HSL color value stored on-chain via contract event logs, leaving behind an everlasting trace of each address's participation. The color data is indexed and used to deterministically generate a collectively-owned artwork shown on the homepage. A single ERC721 of this artwork can be acquired.</p>
 
                 <p>Owners of $BMOON tokens can claim NFTs with the tokens they have minted. The contract only accepts 1,777,778 $BMOON per mint, or 2% of the total token supply. The contract generates entirely on-chain dynamic art (base64 SVG). The artworks are 22 x 22 grids of 242 unique random blue hues, used twice, and laid out with a pseudo-Fisher-Yates shuffle on-chain algorithm. The owner's address and the latest mined block are used as seeds to generate the hues. Every time the artworks are generated via the contract's read function, the outputs change. There is no maximum number of physical editions collectors of these NFTs can order.</p>
 
@@ -147,6 +155,27 @@
                 <button id="close-artwork">x</button>
                 <h2></h2>
                 <div id="artwork-grid"></div>
+            </div>
+
+            <!-- Buy Total NFT Modal -->
+            <div id="buy-total-modal">
+                <button id="close-buy-total">x</button>
+                <div id="buy-total-content">
+                    <p>The output that was generated by all 20,002 ERC20 $BMOON mints (shown on the homepage) can be minted as a 1/1 fully on-chain NFT. It is formatted as a 142×141 BMP-SVG-wrapped image. Contrary to the other Blue Moon NFTs (limited edition 22×22 dynamic artworks), this asset is unique and fixed. The output is drawn using the transaction data taken from the ERC20 event logs.</p>
+
+                    <p>The price is set at 8,888 USDC. Since this artwork was collectively generated, the proceeds from its sale will be distributed proportionally to all ERC20 minters. The funds can be distributed automatically to all 67 minters by calling the contract's public "distribute payouts" function.</p>
+
+                    <div id="buy-total-buttons">
+                        <button id="buy-canvas-btn" class="mint-option-btn">
+                            <div class="mint-title">BUY CANVAS</div>
+                            <div class="mint-cost">8,888.00 USDC</div>
+                        </button>
+                        <button id="distribute-payouts-btn" class="mint-option-btn">
+                            <div class="mint-title">DISTRIBUTE PAYOUTS</div>
+                        </button>
+                    </div>
+                    <div id="buy-total-status"></div>
+                </div>
             </div>
 
             <!-- Audio Element -->

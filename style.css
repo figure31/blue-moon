@@ -182,6 +182,7 @@ canvas {
     left: 50%;
     transform: translateX(-50%);
     display: flex;
+    gap: 10px;
     align-items: center;
 }
 
@@ -235,6 +236,10 @@ button:hover {
 }
 
 #connect-btn.connected {
+    display: none;
+}
+
+#highlight-btn {
     display: none;
 }
 
@@ -359,6 +364,10 @@ button:hover {
     font-family: 'ProtoMono', monospace;
     font-size: 12px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .mint-option-btn:hover {
@@ -502,6 +511,83 @@ button:hover {
     color: var(--blue);
 }
 
+/* Buy Total NFT Modal */
+#buy-total-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    max-width: 90%;
+    background: white;
+    border: 2px solid var(--blue);
+    padding: 30px;
+    display: none;
+    z-index: 1000;
+    color: var(--blue);
+}
+
+#buy-total-modal.active {
+    display: block;
+}
+
+#close-buy-total {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 12px;
+    background: white;
+    color: var(--blue);
+}
+
+#close-buy-total:hover {
+    background: var(--blue);
+    color: white;
+}
+
+#buy-total-content p {
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+#buy-total-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    justify-content: center;
+}
+
+#buy-total-buttons .mint-option-btn {
+    flex: 1;
+    max-width: 240px;
+    background: var(--blue);
+    color: white;
+}
+
+#buy-total-buttons .mint-option-btn:hover {
+    background: white;
+    color: var(--blue);
+}
+
+#buy-total-status {
+    text-align: center;
+    font-size: 12px;
+    min-height: 14px;
+    color: var(--blue);
+}
+
+#buy-total-btn {
+    background: var(--blue);
+    color: white;
+}
+
+#buy-total-btn:hover {
+    background: white;
+    color: var(--blue);
+}
+
 /* ============================================ */
 /* MOBILE RESPONSIVE STYLES */
 /* ============================================ */
@@ -551,6 +637,11 @@ button:hover {
         display: none;
     }
 
+    /* Hide buy total button on mobile (desktop only) */
+    #buy-total-btn {
+        display: none !important;
+    }
+
     /* Hide song title on mobile - only show play/pause button */
     #song-title-container {
         display: none;
@@ -565,7 +656,8 @@ button:hover {
 
     /* Hide contract links on mobile */
     #contract-erc20-link,
-    #contract-erc721-link {
+    #contract-erc721-link,
+    #contract-total-link {
         display: none;
     }
 
