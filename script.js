@@ -475,12 +475,9 @@ async function getUSDCBalance(address) {
  * Update wallet UI with user data
  */
 async function updateWalletUI() {
-    const isMobile = window.innerWidth <= 768;
-    const mintedSuffix = isMobile ? '' : ' minted';
-
     if (!userAddress) {
         walletInfo.classList.remove('connected');
-        walletMinted.textContent = `0 $${TOKEN_SYMBOL || 'BLUE'}${mintedSuffix}`;
+        walletMinted.textContent = `0 $${TOKEN_SYMBOL || 'BLUE'}`;
         walletUsdc.textContent = '0 USDC';
         walletAddress.textContent = '0x0000...0000';
         highlightBtn.style.display = 'none';
@@ -492,20 +489,24 @@ async function updateWalletUI() {
     walletInfo.classList.add('connected');
     walletAddress.textContent = formatAddress(userAddress);
 
-    // Get user stats from subgraph
-    const userStats = await getUserStats(userAddress);
-
-    // Cache user stats for mint modal display
-    cachedUserStats = userStats;
-
-    // Get USDC balance from contract
+    // Get balances directly from contracts (no longer using subgraph)
+    const blueBalance = await getBLUEBalance(userAddress);
     const usdcBalance = await getUSDCBalance(userAddress);
 
-    // Update UI - minted amount from subgraph, USDC from contract
-    const blueMinted = userStats ? Math.floor(parseInt(userStats.totalBlueMinted) / 1e18) : 0;
-    walletMinted.textContent = `${blueMinted.toLocaleString()} $${TOKEN_SYMBOL || 'BLUE'}${mintedSuffix}`;
+    // Update UI - show current wallet balances
+    const blueAmount = Math.floor(parseFloat(blueBalance));
+    walletMinted.textContent = `${blueAmount.toLocaleString()} $${TOKEN_SYMBOL || 'BLUE'}`;
     walletUsdc.textContent = `${parseFloat(usdcBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USDC`;
 
+    // Highlight feature disabled (requires subgraph data for mintIds)
+    highlightBtn.style.display = 'none';
+    userMintIds = [];
+
+    /* ===== COMMENTED OUT: Subgraph User Stats (No Longer Used) =====
+    // Get user stats from subgraph
+    const userStats = await getUserStats(userAddress);
+    // Cache user stats for mint modal display
+    cachedUserStats = userStats;
     // Store user's mintIds for highlight feature
     if (userStats && userStats.mintIds && userStats.mintIds.length > 0) {
         userMintIds = userStats.mintIds.map(id => parseInt(id));
@@ -514,6 +515,7 @@ async function updateWalletUI() {
         userMintIds = [];
         highlightBtn.style.display = 'none';
     }
+    ===== END COMMENTED OUT CODE ===== */
 
 }
 
@@ -545,9 +547,8 @@ async function connectWallet() {
             return false;
         }
 
-        // Set up provider and signer
+        // Set up initial provider to check network
         provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
         userAddress = accounts[0];
 
         // Check if on correct network
@@ -566,7 +567,13 @@ async function connectWallet() {
                 return false;
             }
             console.log('✅ Switched to', CURRENT_NETWORK.name);
+
+            // IMPORTANT: Recreate provider after network switch
+            provider = new ethers.providers.Web3Provider(window.ethereum);
         }
+
+        // Set signer after network is correct
+        signer = provider.getSigner();
 
         // Mark as connected
         isWalletConnected = true;
@@ -843,24 +850,26 @@ function closeMintModal() {
 let cachedUserStats = null;
 
 /**
- * Update mint limit display (uses cached user stats from updateWalletUI)
+ * Update mint limit display (reads balance from contract)
  */
-function updateMintLimitDisplay() {
+async function updateMintLimitDisplay() {
     if (!MAX_MINT_LIMIT) {
         mintLimitDisplay.textContent = 'Loading...';
         return;
     }
 
     const isMobile = window.innerWidth <= 768;
-    const suffix = isMobile ? '' : ' max tokens minted';
+    const suffix = isMobile ? '' : ' tokens owned';
 
-    if (!userAddress || !cachedUserStats) {
+    if (!userAddress) {
         mintLimitDisplay.textContent = `0 / ${MAX_MINT_LIMIT.toLocaleString()}${suffix}`;
         return;
     }
 
-    const minted = cachedUserStats ? Math.floor(parseInt(cachedUserStats.totalBlueMinted) / 1e18) : 0;
-    mintLimitDisplay.textContent = `${minted.toLocaleString()} / ${MAX_MINT_LIMIT.toLocaleString()}${suffix}`;
+    // Get BLUE balance from contract
+    const blueBalance = await getBLUEBalance(userAddress);
+    const balance = Math.floor(parseFloat(blueBalance));
+    mintLimitDisplay.textContent = `${balance.toLocaleString()} / ${MAX_MINT_LIMIT.toLocaleString()}${suffix}`;
 }
 
 // Canvas setup
@@ -1303,20 +1312,9 @@ function handleResize() {
         cancelAnimationFrame(animationId);
     }
 
-    // Update wallet address and minted text format if connected (mobile vs desktop)
+    // Update wallet address format if connected (mobile vs desktop)
     if (isWalletConnected && userAddress) {
-        const isMobile = window.innerWidth <= 768;
-        const mintedSuffix = isMobile ? '' : ' minted';
         walletAddress.textContent = formatAddress(userAddress);
-
-        // Update wallet minted text format
-        const currentText = walletMinted.textContent;
-        const match = currentText.match(/^([\d,]+)\s+\$(\w+)(\s+minted)?$/);
-        if (match) {
-            const amount = match[1];
-            const symbol = match[2];
-            walletMinted.textContent = `${amount} $${symbol}${mintedSuffix}`;
-        }
     }
 
     // Reset and reinitialize
@@ -1523,10 +1521,10 @@ function animateCounters(fromZero = false) {
     animate();
 }
 
-/* ===== COMMENTED OUT: Address Feed Display Functions (No Longer Used) =====
+/**
  * Format address for display (0x1234...5678)
  * Shorter format on mobile (0x12...78)
-
+ */
 function formatAddress(address) {
     if (!address || address.length < 10) return '0x0000...0000';
 
@@ -1539,6 +1537,7 @@ function formatAddress(address) {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
+/* ===== COMMENTED OUT: Address Feed Display Functions (No Longer Used) =====
  * Update address feed with real transaction data
 
 let currentTxIndex = 0;
